@@ -6,9 +6,9 @@
   <title>BlogMe | Inspírate</title>
 
   <!-- Estilos -->
-  <link rel="stylesheet" href="/css/global.css">
-  <link rel="stylesheet" href="/css/landing.css">
-  <link rel="stylesheet" href="/css/subscriptions.css">
+  <link rel="stylesheet" href="../styles/global.css">
+  <link rel="stylesheet" href="../styles/landing.css">
+  <link rel="stylesheet" href="../styles/subscriptions.css">
 
   <meta name="description" content="BlogMe — Comparte ideas, conecta con lectores y crece como creador.">
 </head>
@@ -23,7 +23,7 @@
   <header class="nav" role="banner">
     <div class="nav-inner container-centered">
       <div class="brand" aria-label="BlogMe logo">
-        <a href="/pages/landing.html" class="brand-link">
+        <a href="./landing.html" class="brand-link">
           <img src="https://upload.wikimedia.org/wikipedia/commons/4/42/Blog_%281%29.jpg"
                alt="Logo BlogMe" class="logo-img">
           <div class="brand-txt"><strong>Blog<span>Me</span></strong></div>
@@ -31,13 +31,16 @@
       </div>
 
       <nav class="nav-links" id="main-nav" role="navigation" aria-label="Menú principal">
-        <a href="/pages/landing.html" class="nav-link" data-nav="inicio">Inicio</a>
-        <a href="/pages/publicaciones.html" class="nav-link" data-nav="explorar">Explorar</a>
-        <a href="/pages/acerca.html" class="nav-link" data-nav="acerca">Acerca</a>
-        <a href="/pages/ayuda.html" class="nav-link" data-nav="ayuda">Ayuda</a>
-        <a href="/pages/login.html" class="btn solid nav-cta" data-nav="login">Iniciar sesión</a>
+        <!-- Links apuntan a las páginas dentro de src/pages/ -->
+        <a href="./landing.html" class="nav-link" data-nav="inicio">Inicio</a>
+        <!-- Aquí está el cambio: Explorar apunta a publicaciones.html -->
+        <a href="./explorar.html" class="nav-link" data-nav="explorar">Explorar</a>
+        <a href="./acerca.html" class="nav-link" data-nav="acerca">Acerca</a>
+        <a href="./ayuda.html" class="nav-link" data-nav="ayuda">Ayuda</a>
+        <a href="./login.html" class="btn solid nav-cta" data-nav="login">Iniciar sesión</a>
       </nav>
 
+      <!-- Botón hamburguesa para mobile -->
       <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="main-nav">
         <span class="hamburger"></span>
       </button>
@@ -53,8 +56,8 @@
         <p class="hero-sub">BlogMe es el lugar para compartir ideas, historias y creatividad. Diseño limpio y comunidad real — únete hoy y haz que tu voz llegue más lejos.</p>
 
         <div class="hero-actions">
-          <a href="/pages/login.html" class="btn solid big">Comienza ahora</a>
-          <a href="/pages/publicaciones.html" class="btn ghost">Ver publicaciones</a>
+          <a href="./login.html" class="btn solid big">Comienza ahora</a>
+          <a href="./publicaciones.html" class="btn ghost">Ver publicaciones</a>
         </div>
 
         <ul class="hero-features" aria-hidden="false">
@@ -87,7 +90,7 @@
       </aside>
     </section>
 
-    <!-- Suscripciones -->
+    <!-- Suscripciones (enlazadas con subscriptions.js via data-sub-plan) -->
     <section class="subscriptions container-centered" id="suscripciones" aria-labelledby="titulo-suscripciones">
       <h2 id="titulo-suscripciones">Elige tu suscripción</h2>
       <p class="subtitle">Planes pensados para cada tipo de usuario. Más privilegios, más creatividad.</p>
@@ -101,6 +104,7 @@
             <li>Comentar y reaccionar</li>
             <li>1 publicación destacada por mes</li>
           </ul>
+          <!-- data-sub-plan enlazado con subscriptions.js -->
           <button class="btn-primary" data-sub-plan="Basico">Suscribirse</button>
         </article>
 
@@ -135,7 +139,7 @@
     <section class="cta container-centered" id="cta">
       <h2>¿Listo para empezar?</h2>
       <p>Únete a miles de creadores que comparten sus ideas en BlogMe.</p>
-      <a href="/pages/login.html" class="btn solid big">Crear cuenta</a>
+      <a href="./login.html" class="btn solid big">Crear cuenta</a>
     </section>
   </main>
 
@@ -146,9 +150,9 @@
         <small>© 2025 BlogMe — Todos los derechos reservados</small>
       </div>
       <div class="footer-right">
-        <a href="/pages/acerca.html">Acerca</a>
-        <a href="/pages/ayuda.html">Ayuda</a>
-        <a href="/pages/politica.html">Política y términos</a>
+        <a href="./acerca.html">Acerca</a>
+        <a href="./ayuda.html">Ayuda</a>
+        <a href="./politica.html">Política y términos</a>
       </div>
     </div>
   </footer>
@@ -184,7 +188,10 @@
   </div>
 
   <!-- Scripts -->
-  <script src="/js/main.js" defer></script>
-  <script src="/js/subscriptions.js" defer></script>
+  <script src="../js/main.js" defer></script>
+  <script src="../js/subscriptions.js" defer></script>
 </body>
 </html>
+<!-- landing.html -->
+<link rel="stylesheet" href="../css/landing.css">
+<script src="../js/main.js"></script>

@@ -1777,3 +1777,475 @@ select option:focus {
   object-fit: cover;
   margin-bottom: 12px;
 }
+/* =====================================================
+   🌙 GLASS UI ROOT VARIABLES
+   Tonos estilo Instagram / Threads / iOS glass
+===================================================== */
+
+:root {
+  --glass-bg: rgba(255,255,255,0.55);
+  --glass-dark: rgba(25,25,25,0.55);
+  --blur: 18px;
+
+  --accent:  #392ce7;
+  --accent2:  #392ce7;
+  --accent3:  #392ce7;
+
+  --card-radius: 18px;
+  --shadow-soft: 0 6px 28px rgba(0,0,0,0.15);
+  --shadow-lift: 0 10px 40px rgba(0,0,0,0.25);
+
+  --transition-fast: 0.18s ease;
+  --transition-med: 0.28s ease;
+  --transition-slow: 0.45s ease;
+}
+
+/* soporte para dark mode */
+.dark {
+  --glass-bg: rgba(25,25,25,0.70);
+  --glass-dark: rgba(0,0,0,0.75);
+
+  --accent:  #392ce7;
+  --accent2:  #392ce7;
+  --accent3: #392ce7;
+}
+/* =====================================================
+      🌟 CONTENEDORES GLASS PREMIUM
+===================================================== */
+
+.container,
+.card,
+.box,
+.modal-content,
+.topbar,
+.left-pane,
+.right-pane,
+.feed article {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(255,255,255,0.30);
+}
+/* =====================================================
+      🔘 BOTONES GLASS ESTILO INSTAGRAM
+===================================================== */
+
+button,
+.btn-primary,
+.btn-nav,
+.btn-ghost,
+.action-btn {
+  position: relative;
+  border-radius: 14px;
+  padding: 8px 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-med);
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+
+button:hover,
+.btn-primary:hover,
+.btn-nav:hover,
+.btn-ghost:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+}
+
+/* efecto desactivar */
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* 🔥 Ripple animado */
+button::after,
+.action-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.6) 10%, transparent 60%);
+  transform: scale(0.4);
+  transition: opacity .35s, transform .35s;
+}
+
+button:active::after,
+.action-btn:active::after {
+  opacity: 1;
+  transform: scale(1.6);
+}
+/* =====================================================
+     📌 TARJETAS POST — EFECTO GLASS HOVER
+===================================================== */
+
+.feed article.post {
+  transition: var(--transition-med);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.feed article.post:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift);
+}
+/* =====================================================
+     👤 AVATAR HALO EFFECT
+===================================================== */
+
+.profile-link img,
+.post-author img,
+#pvAvatar {
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  object-fit: cover;
+  transition: var(--transition-fast);
+  box-shadow: 0 0 0 0 rgba(255,180,40,0.6);
+}
+
+.profile-link img:hover,
+.post-author img:hover,
+#pvAvatar:hover {
+  box-shadow: 0 0 12px 3px var(--accent2);
+  transform: scale(1.05);
+  cursor: pointer;
+}
+/* =====================================================
+     🔖 CATEGORÍAS CHIPS GLASS
+===================================================== */
+
+.post-category {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #333;
+  font-weight: 600;
+  transition: var(--transition-fast);
+}
+
+.post-category:hover {
+  background: rgba(255,255,255,0.8);
+  transform: scale(1.04);
+}
+/* =====================================================
+     🪟 MODALS GLASS UI
+===================================================== */
+
+.modal {
+  backdrop-filter: blur(10px) brightness(0.75);
+  -webkit-backdrop-filter: blur(10px) brightness(0.75);
+}
+
+.modal-content {
+  background: var(--glass-bg);
+  border-radius: 20px;
+  padding: 22px;
+}
+/* =====================================================
+     🌗 DARK MODE TRANSITION
+===================================================== */
+
+html,
+body,
+.container,
+.feed article.post,
+.left-pane,
+.right-pane,
+.card {
+  transition: background .35s ease, color .35s ease, box-shadow .35s ease;
+}
+
+.dark body,
+.dark .container,
+.dark .feed article.post,
+.dark .left-pane,
+.dark .right-pane {
+  background: rgba(22,22,22,0.80);
+  color: #eee;
+}
+/* =====================================================
+     ✨ ANIMACIONES GLASS UI PREMIUM
+     Reveal, bounce, glow, float, micro-interactions
+===================================================== */
+
+/* Fade Up Reveal */
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide Left Reveal */
+@keyframes slideLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Slide Right Reveal */
+@keyframes slideRight {
+  0% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* UI Floating subtle hover */
+@keyframes floatSoft {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Glow pulse for accent elements */
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 0 rgba(255,120,40,0.0);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(255,160,80,0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(255,120,40,0.0);
+  }
+}
+
+/* Icon bounce (likes, save, reactions) */
+@keyframes iconBounce {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.25);
+  }
+  70% {
+    transform: scale(0.90);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Ripple blur expanding background */
+@keyframes rippleBlur {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+/* Infinite glass loader ring */
+@keyframes glassSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(460deg);
+  }
+}
+
+/* Scroll reveal staggered */
+.reveal {
+  opacity: 0;
+  animation: fadeUp .55s ease forwards;
+}
+
+/* Float on hover for cards */
+.glass-float:hover {
+  animation: floatSoft 2.4s ease infinite;
+}
+
+/* Glow pulse utility */
+.pulse {
+  animation: glowPulse 1.8s ease-in-out infinite;
+}
+
+/* icon bounce utility class */
+.bounce {
+  animation: iconBounce .45s ease;
+}
+
+/* Loader spinner style */
+.infinite-loader {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border-top: 3px solid rgba(255,255,255,0.9);
+  border-right: 3px solid rgba(255,255,255,0.6);
+  border-bottom: 3px solid rgba(255,255,255,0.25);
+  animation: glassSpin .65s linear infinite;
+  margin: auto;
+}
+
+/* Applying reveal to posts */
+.feed article.post {
+  animation: fadeUp .45s ease;
+}
+
+/* Apply left pane slide reveal */
+.left-pane {
+  animation: slideLeft .65s ease;
+}
+
+/* Apply right pane reveal */
+.right-pane {
+  animation: slideRight .65s ease;
+}
+
+/* Buttons pulse subtle */
+button:hover {
+  animation: glowPulse 1.2s ease-in-out 1;
+}
+
+/* Avatar glow when hovering */
+.profile-link img:hover,
+.post-author img:hover,
+#pvAvatar:hover {
+  animation: glowPulse 1.6s ease-in-out;
+}
+/* ---------------------------------------------------------
+   MICRO-INTERACCIONES — hover, active y press feedback
+   Estilo iOS / Threads / Instagram Glass UI
+---------------------------------------------------------- */
+
+/* Hover suave para botones */
+.btn,
+button,
+input[type="submit"] {
+  transition: background 0.28s ease, transform 0.22s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+}
+
+.btn:hover,
+button:hover,
+input[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  filter: brightness(1.05);
+}
+
+/* Click (tap) efecto rebote */
+.btn:active,
+button:active,
+input[type="submit"]:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Hover para contenedores glass */
+.glass-card,
+.card,
+.panel,
+.post-box {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border 0.2s ease;
+}
+
+.glass-card:hover,
+.card:hover,
+.post-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+}
+
+/* Hover sobre inputs tipo iOS */
+input,
+textarea,
+select {
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-accent);
+  background: rgba(var(--accent-rgb), 0.08);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.12);
+}
+
+/* Efecto iluminado al pasar sobre íconos */
+.icon-btn:hover,
+svg:hover {
+  transform: scale(1.13);
+  filter: drop-shadow(0 0 8px rgba(var(--accent-rgb), 0.65));
+}
+
+/* Animación de aparición cuando los elementos cargan */
+.fade-in {
+  animation: fadeIn 0.65s ease forwards;
+  opacity: 0;
+}
+
+/* Efecto de ‘pulso’ al marcar favoritos o likes */
+.pulse-once {
+  animation: pulseOnce 0.35s ease;
+}
+
+/* Botones con burbuja on-click (Apple UI feedback) */
+.bubble-click {
+  position: relative;
+  overflow: hidden;
+}
+
+.bubble-click:active::after {
+  content: "";
+  position: absolute;
+  width: 260%;
+  height: 260%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  border-radius: 50%;
+  background: rgba(var(--accent-rgb), 0.15);
+  animation: bubble 0.45s ease;
+}
+
+/* ---------------------------------------------------------
+   KEYFRAMES de este bloque
+---------------------------------------------------------- */
+
+@keyframes pulseOnce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+@keyframes bubble {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}

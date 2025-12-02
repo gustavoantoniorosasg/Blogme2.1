@@ -29,7 +29,7 @@
 
       <div class="selects">
         <select id="filterCategory">
-          <option value="">Todas las categorías</option>
+          <option value="">Todas</option>
           <option value="Tecnología">Tecnología</option>
           <option value="Noticias">Noticias</option>
           <option value="Arte & Diseño">Arte & Diseño</option>
@@ -49,7 +49,7 @@
         <button id="darkToggle" class="btn-nav" title="Tema">
           <i class="fa-solid fa-moon"></i>
         </button>
-
+        
         <a class="btn-nav" href="./publicaciones.html">Inicio</a>
         <a class="btn-nav" href="./perfil.html">Perfil</a>
 
@@ -60,10 +60,10 @@
     </nav>
   </header>
 
-  <!-- CONTENIDO PRINCIPAL -->
+  <!-- LAYOUT PRINCIPAL -->
   <main class="container">
 
-    <!-- LEFT -->
+    <!-- PANEL IZQUIERDO -->
     <aside class="left-pane">
 
       <!-- CREAR PUBLICACIÓN -->
@@ -78,7 +78,6 @@
           <button data-cmd="image"><i class="fa-solid fa-image"></i></button>
         </div>
 
-        <!-- EDITOR -->
         <div id="editor" class="editor" contenteditable="true"></div>
 
         <select id="postCategory">
@@ -99,6 +98,7 @@
         <div class="actions-row">
           <button id="btnPublish" class="btn-primary">Publicar</button>
           <button id="btnClear" class="btn-ghost">Limpiar</button>
+          
         </div>
       </section>
 
@@ -123,12 +123,12 @@
 
     </aside>
 
-    <!-- FEED -->
-    <section id="feed" class="feed" aria-live="polite">
+    <!-- FEED CENTRADO GRANDE -->
+    <section id="feed" class="feed">
       <div id="infiniteLoader" class="infinite-loader">Cargando...</div>
     </section>
 
-    <!-- RIGHT -->
+    <!-- PANEL DERECHO -->
     <aside class="right-pane">
 
       <!-- TENDENCIAS -->

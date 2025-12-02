@@ -763,3 +763,199 @@
   function loadSaved(){ saved = storageGetLocal(SAVED_KEY, []) || []; }
 
 })();
+/* -------------------------------------------------------------
+   SOCIAL UI PRO — Perfiles, Guardado Dinámico, DarkMode, Fix UI
+   Compatible con backend (DB)
+-------------------------------------------------------------- */
+
+/* ============================
+   1) Estado Global UI / Usuario
+=========================== */
+
+const appState = {
+    currentUser: null,   // usuario activo logeado
+    selectedProfile: null,
+    darkMode: localStorage.getItem("darkMode") === "true",
+};
+
+
+/* ============================
+   2) Obtener datos desde tu DB
+=========================== */
+
+async function fetchUserProfile(userId) {
+    try {
+        const res = await fetch(`/api/usuarios/${userId}`);
+        if (!res.ok) throw new Error("Error al cargar perfil");
+
+        return await res.json();
+    } catch (err) {
+        console.error(err);
+        alert("No se pudo cargar el perfil del usuario.");
+        return null;
+    }
+}
+
+async function savePostToDB(postData) {
+    try {
+        const res = await fetch("/api/publicaciones", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(postData),
+        });
+
+        if (!res.ok) throw new Error("Error guardando publicación");
+
+        return await res.json();
+    } catch (err) {
+        console.error(err);
+        alert("No se pudo guardar la publicación.");
+        return null;
+    }
+}
+
+
+/* ======================================
+   3) UI — Abrir perfil al clickear avatar
+====================================== */
+
+document.addEventListener("click", async (e) => {
+    const avatar = e.target.closest(".user-avatar");
+
+    if (!avatar) return;
+
+    const uid = avatar.dataset.userid;
+    if (!uid) return;
+
+    const profileData = await fetchUserProfile(uid);
+
+    if (profileData) {
+        appState.selectedProfile = profileData;
+        openProfileModal(profileData); // función UI
+    }
+});
+
+
+/* ======================================
+   4) UI — Mostrar Perfil en Modal
+====================================== */
+
+function openProfileModal(data) {
+    const modal = document.getElementById("profileModal");
+
+    modal.querySelector(".profile-name").textContent = data.nombre;
+    modal.querySelector(".profile-desc").textContent = data.descripcion;
+    modal.querySelector(".profile-posts").innerHTML = data.publicaciones
+        .map(p => `<div class="mini-post">${p.titulo}</div>`)
+        .join("");
+
+    modal.classList.add("active");
+}
+
+
+/* ======================================
+   5) Guardar publicación dinámica
+====================================== */
+
+document.getElementById("savePostBtn").addEventListener("click", async () => {
+    const title = document.getElementById("postTitle").value.trim();
+    const content = document.getElementById("postBody").value.trim();
+
+    if (!title || !content) {
+        return alert("Completa los campos antes de publicar.");
+    }
+
+    const newPost = {
+        usuario: appState.currentUser,
+        titulo: title,
+        contenido: content,
+        fecha: new Date().toISOString(),
+    };
+
+    const saved = await savePostToDB(newPost);
+
+    if (saved) {
+        appendPostToLeftPanel(saved);
+        cleanPostFields();
+    }
+});
+
+
+/* ======================================
+   6) Agregar publicación al lado izquierdo
+====================================== */
+
+function appendPostToLeftPanel(post) {
+    const list = document.getElementById("leftPostList");
+
+    const el = document.createElement("div");
+    el.className = "left-post-item fade-in";
+    el.innerHTML = `
+        <div class="post-title">${post.titulo}</div>
+        <div class="post-meta">${new Date(post.fecha).toLocaleString()}</div>
+    `;
+
+    list.prepend(el);
+}
+
+
+/* ======================================
+   7) Limpiar inputs después de publicar
+====================================== */
+
+function cleanPostFields() {
+    document.getElementById("postTitle").value = "";
+    document.getElementById("postBody").value = "";
+}
+
+
+/* ======================================
+   8) Dark mode funcional + persistencia
+====================================== */
+
+function applyDarkMode() {
+    document.body.classList.toggle("dark-theme", appState.darkMode);
+}
+
+document.getElementById("themeToggle").addEventListener("click", () => {
+    appState.darkMode = !appState.darkMode;
+    localStorage.setItem("darkMode", appState.darkMode);
+    applyDarkMode();
+});
+
+applyDarkMode();
+
+
+/* =====================================================
+   9) Fix UI — Prevent overflow del botón “Elegir archivos”
+===================================================== */
+
+function fixUploadButton() {
+    const uploadBtn = document.querySelector(".file-upload-label");
+
+    if (!uploadBtn) return;
+
+    uploadBtn.style.overflow = "hidden";
+    uploadBtn.style.textOverflow = "ellipsis";
+    uploadBtn.style.whiteSpace = "nowrap";
+    uploadBtn.style.maxWidth = "100%";
+}
+
+fixUploadButton();
+
+
+/* ======================================================
+   10) Inicializar usuario actual desde backend/session
+====================================================== */
+
+async function loadCurrentUser() {
+    try {
+        const res = await fetch("/api/auth/me");
+        if (!res.ok) return;
+
+        appState.currentUser = await res.json();
+    } catch (err) {
+        console.warn("No se cargó usuario activo");
+    }
+}
+loadCurrentUser();

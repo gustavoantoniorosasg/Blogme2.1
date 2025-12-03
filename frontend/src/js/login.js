@@ -134,7 +134,7 @@ loginForm.addEventListener("submit", async (e) => {
       localStorage.setItem("adminSession", "true");
 
       showToast(`Bienvenido administrador: ${data.admin.username}`, "success");
-      setTimeout(() => window.location.href = "admin.html", 900);
+      setTimeout(() => window.location.href = "admin.html", 4000);
       return;
     }
 

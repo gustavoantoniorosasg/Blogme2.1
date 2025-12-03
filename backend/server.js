@@ -14,11 +14,19 @@ import Admin from "./models/Admin.js";
 import usuarios from "./routes/usuarios.js";
 import adminRoutes from "./routes/admin.js";
 import publicacionesRoutes from "./routes/publicaciones.js";
+// Seguridad básica para producción
+import helmet from "helmet";
+app.use(helmet());
 
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.use(express.json());
 
 // 🔹 Conexión MongoDB usando .env

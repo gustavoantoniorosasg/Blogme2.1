@@ -6,6 +6,7 @@
    - Integración con comments.js via window.openComments(postId)
    - Optimistic UI y parcheo (solo actualiza HTML necesario)
 */
+import { API_ADMIN, API_USUARIOS, API_PUBLICACIONES } from "./config.js";
 
 (() => {
   'use strict';
@@ -785,7 +786,7 @@ const appState = {
 
 async function fetchUserProfile(userId) {
     try {
-        const res = await fetch(`/api/usuarios/${userId}`);
+        const res = await fetch(`${API_PUBLICACIONES}/nueva`);
         if (!res.ok) throw new Error("Error al cargar perfil");
 
         return await res.json();
@@ -798,7 +799,7 @@ async function fetchUserProfile(userId) {
 
 async function savePostToDB(postData) {
     try {
-        const res = await fetch("/api/publicaciones", {
+        const res = await fetch(`${API_PUBLICACIONES}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(postData),
@@ -950,7 +951,7 @@ fixUploadButton();
 
 async function loadCurrentUser() {
     try {
-        const res = await fetch("/api/auth/me");
+        const res = await fetch(`${API_PUBLICACIONES}/nueva`);
         if (!res.ok) return;
 
         appState.currentUser = await res.json();

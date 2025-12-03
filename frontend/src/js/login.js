@@ -1,4 +1,10 @@
 // ===========================================================
+// Importar configuración global de API
+// ===========================================================
+import { API_ADMIN, API_USUARIOS } from "./config.js";
+
+
+// ===========================================================
 // 🔵 SISTEMA DE TOAST (mensajes bonitos sin alterar diseño)
 // ===========================================================
 
@@ -60,10 +66,6 @@ const loginTab = document.getElementById("login-tab");
 const registerTab = document.getElementById("register-tab");
 const loginForm = document.getElementById("login-form");
 const registerForm = document.getElementById("register-form");
-
-// URLs backend
-const API_USUARIOS = "http://localhost:4000/api/usuarios";
-const API_ADMIN = "http://localhost:4000/api/admin";
 
 // Tabs
 loginTab.addEventListener("click", () => {
@@ -194,11 +196,10 @@ registerForm.addEventListener("submit", async (e) => {
 
   try {
     const resp = await fetch(`${API_USUARIOS}/registrar`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ username, correo, password }),
-});
-
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, correo, password }),
+    });
 
     const data = await resp.json();
 

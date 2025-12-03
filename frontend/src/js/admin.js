@@ -1,3 +1,8 @@
+// ===============================
+// 🔧 CONFIG: URL del backend real
+// ===============================
+const API_URL = "https://blogme2-1.onrender.com/api/admin";
+
 // 🚨 Protección de acceso
 if (!localStorage.getItem("adminSession")) {
   alert("Acceso denegado. Inicia sesión como administrador.");
@@ -10,25 +15,24 @@ document.getElementById("logout-btn").addEventListener("click", () => {
   window.location.href = "login.html";
 });
 
-// 🌐 URL base del backend
-const API_URL = "http://localhost:4000/api/admin";
-
-// 🧍‍♀️ Tablas
+// 🧍 Tablas
 const userTable = document.querySelector("#usersTable tbody");
 const postTable = document.querySelector("#postsTable tbody");
 
-// 👁️ Modal de ver publicación
+// 👁️ Modal
 const modal = document.getElementById("viewModal");
 const modalTitle = document.getElementById("modalTitle");
 const modalContent = document.getElementById("modalContent");
 const closeModal = document.getElementById("closeModal");
 
 /* ============================================================
-   📦 Cargar datos reales desde MongoDB
+   📦 Obtener datos reales del backend
 ============================================================ */
 async function cargarDatos() {
   try {
-    // 👥 Obtener usuarios
+    /* =======================
+       👥 Obtener usuarios
+    ======================== */
     const resUsuarios = await fetch(`${API_URL}/usuarios`);
     if (!resUsuarios.ok) throw new Error("Error al obtener usuarios");
     const usuarios = await resUsuarios.json();
@@ -36,6 +40,7 @@ async function cargarDatos() {
     userTable.innerHTML = "";
     usuarios.forEach(u => {
       const row = document.createElement("tr");
+
       row.innerHTML = `
         <td>${u.username}</td>
         <td>${u.email || "Sin correo"}</td>
@@ -44,10 +49,13 @@ async function cargarDatos() {
           <button class="delete-btn" data-id="${u._id}" data-type="user">🗑️ Eliminar</button>
         </td>
       `;
+
       userTable.appendChild(row);
     });
 
-    // 📰 Obtener publicaciones
+    /* =======================
+       📰 Obtener publicaciones
+    ======================== */
     const resPosts = await fetch(`${API_URL}/publicaciones`);
     if (!resPosts.ok) throw new Error("Error al obtener publicaciones");
     const posts = await resPosts.json();
@@ -58,17 +66,17 @@ async function cargarDatos() {
       const avatar = p.authorAvatar || "../img/default-avatar.png";
       const textoCorto = p.content.length > 40 ? p.content.substring(0, 40) + "..." : p.content;
 
-      // Guardamos la publicación completa en data-attributes para el modal
-      rowHTML = `
+      const row = document.createElement("tr");
+      row.innerHTML = `
         <td>${textoCorto}</td>
         <td>
           <div class="post-author">
-            <img src="${avatar}" alt="avatar" class="avatar-mini">
+            <img src="${avatar}" class="avatar-mini">
             <span>${autor}</span>
           </div>
         </td>
         <td>
-          <button class="view-btn" 
+          <button class="view-btn"
             data-texto="${p.content}"
             data-imagen="${p.img || ""}"
             data-autor="${autor}">
@@ -77,13 +85,13 @@ async function cargarDatos() {
           <button class="delete-btn" data-id="${p._id}" data-type="post">🗑️ Eliminar</button>
         </td>
       `;
-      const row = document.createElement("tr");
-      row.innerHTML = rowHTML;
+
       postTable.appendChild(row);
     });
 
-    // 🔄 Asignar eventos después de renderizar
+    // Activar eventos
     asignarEventos();
+
   } catch (err) {
     console.error("Error cargando datos:", err);
     alert("❌ No se pudo conectar con el servidor.");
@@ -94,38 +102,45 @@ async function cargarDatos() {
    🗑️ Eliminar usuario o publicación
 ============================================================ */
 function asignarEventos() {
-  // Eliminar elementos
+  /* --------------------------
+      🗑️ Eliminar elemento
+  --------------------------- */
   document.querySelectorAll(".delete-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
       const id = btn.dataset.id;
       const type = btn.dataset.type;
+
       if (!confirm(`¿Eliminar este ${type === "user" ? "usuario" : "post"}?`)) return;
 
       try {
         const res = await fetch(`${API_URL}/${type === "user" ? "usuarios" : "publicaciones"}/${id}`, {
           method: "DELETE"
         });
+
         if (!res.ok) throw new Error("Error al eliminar");
-        alert(`${type === "user" ? "Usuario" : "Publicación"} eliminado correctamente ✅`);
+
+        alert(`${type === "user" ? "Usuario" : "Publicación"} eliminado correctamente`);
         cargarDatos();
+
       } catch (error) {
         console.error(error);
-        alert("❌ No se pudo eliminar el elemento.");
+        alert("❌ No se pudo eliminar.");
       }
     });
   });
 
-  // Ver publicaciones
+  /* --------------------------
+       👁️ Ver publicación
+  --------------------------- */
   document.querySelectorAll(".view-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-      const texto = btn.dataset.texto;
-      const imagen = btn.dataset.imagen;
-      const autor = btn.dataset.autor;
-
-      modalTitle.textContent = `Publicación de ${autor}`;
+      modalTitle.textContent = `Publicación de ${btn.dataset.autor}`;
       modalContent.innerHTML = `
-        <p>${texto}</p>
-        ${imagen ? `<img src="${imagen}" alt="imagen publicación" class="modal-img">` : "<p>Sin imagen</p>"}
+        <p>${btn.dataset.texto}</p>
+        ${btn.dataset.imagen
+          ? `<img src="${btn.dataset.imagen}" class="modal-img">`
+          : "<p>Sin imagen</p>"
+        }
       `;
       modal.style.display = "flex";
     });
@@ -135,7 +150,8 @@ function asignarEventos() {
 /* ============================================================
    👁️ Cerrar modal
 ============================================================ */
-closeModal.addEventListener("click", () => (modal.style.display = "none"));
+closeModal.addEventListener("click", () => modal.style.display = "none");
+
 window.addEventListener("click", e => {
   if (e.target === modal) modal.style.display = "none";
 });

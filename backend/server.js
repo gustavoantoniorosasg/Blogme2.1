@@ -18,6 +18,7 @@ import publicacionesRoutes from "./routes/publicaciones.js";
 
 const app = express();
 
+// Middlewares
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],

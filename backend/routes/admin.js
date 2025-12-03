@@ -1,195 +1,97 @@
-// ===============================
-// 🔧 CONFIG: Backend real Render
-// ===============================
-const API_BASE = "https://blogme2-1.onrender.com";
+import express from "express";
+import bcrypt from "bcrypt";
+import Admin from "../models/Admin.js";
+import Usuario from "../models/Usuario.js";
+import Publicacion from "../models/Publicaciones.js";
 
-const API_ADMIN = `${API_BASE}/api/admin`;
-const API_USERS = `${API_BASE}/api/usuarios`;
-const API_POSTS = `${API_BASE}/api/publicaciones`;
+const router = express.Router();
 
-// 🔁 Despertar Render automáticamente
-(async () => {
+/* ============================================================
+   🔐 LOGIN DE ADMINISTRADOR
+============================================================ */
+router.post("/login", async (req, res) => {
   try {
-    await fetch(`${API_USERS}/ping`, { method: "GET" });
-  } catch (_) {}
-})();
+    const { username, password } = req.body;
 
-// ===============================
-// 🛡️ Protección de acceso
-// ===============================
-if (!localStorage.getItem("adminSession")) {
-  alert("Acceso denegado. Inicia sesión como administrador.");
-  window.location.href = "login.html";
-}
+    const admin = await Admin.findOne({ username });
+    if (!admin)
+      return res.status(404).json({ error: "Administrador no encontrado" });
 
-// ===============================
-// 🔘 Cerrar sesión
-// ===============================
-document.getElementById("logout-btn").addEventListener("click", () => {
-  localStorage.removeItem("adminSession");
-  window.location.href = "login.html";
-});
+    const valid = await bcrypt.compare(password, admin.password);
+    if (!valid)
+      return res.status(400).json({ error: "Contraseña incorrecta" });
 
-// ===============================
-// 📌 Tablas dinámicas
-// ===============================
-const userTable = document.querySelector("#usersTable tbody");
-const postTable = document.querySelector("#postsTable tbody");
-
-// ===============================
-// 🔍 Modal visualización
-// ===============================
-const modal = document.getElementById("viewModal");
-const modalTitle = document.getElementById("modalTitle");
-const modalContent = document.getElementById("modalContent");
-const closeModal = document.getElementById("closeModal");
-
-// ===============================
-// 📦 Obtener datos reales backend
-// ===============================
-async function cargarDatos() {
-  try {
-    /* ======================
-       👥 Obtener usuarios
-    ====================== */
-    const resUsuarios = await fetch(API_USERS, {
-      credentials: "include"
+    res.json({
+      message: "Inicio de sesión exitoso",
+      admin: {
+        id: admin._id,
+        username: admin.username,
+        correo: admin.correo,
+        rol: admin.rol,
+      },
     });
-
-    if (!resUsuarios.ok) throw new Error("Usuarios no accesibles");
-
-    const usuarios = await resUsuarios.json();
-
-    userTable.innerHTML = "";
-    usuarios.forEach(u => {
-      userTable.innerHTML += `
-        <tr>
-          <td>${u.username}</td>
-          <td>${u.correo || "Sin correo"}</td>
-          <td>${u.rol || "usuario"}</td>
-          <td>
-            <button class="delete-btn" data-id="${u._id}" data-type="user">
-              🗑️ Eliminar
-            </button>
-          </td>
-        </tr>`;
-    });
-
-
-    /* ======================
-       📰 Obtener publicaciones
-    ====================== */
-    const resPosts = await fetch(API_POSTS, {
-      credentials: "include"
-    });
-
-    if (!resPosts.ok) throw new Error("Publicaciones no accesibles");
-
-    const posts = await resPosts.json();
-
-    postTable.innerHTML = "";
-    posts.forEach(p => {
-      const autor = p.author || "Usuario eliminado";
-      const avatar = p.authorAvatar || "../img/default-avatar.png";
-      const textoCorto = p.content.length > 40
-        ? p.content.substring(0, 40) + "..."
-        : p.content;
-
-      postTable.innerHTML += `
-        <tr>
-          <td>${textoCorto}</td>
-          <td>
-            <div class="post-author">
-              <img src="${avatar}" class="avatar-mini">
-              <span>${autor}</span>
-            </div>
-          </td>
-          <td>
-            <button class="view-btn"
-              data-texto="${p.content}"
-              data-imagen="${p.img || ""}"
-              data-autor="${autor}">
-              👁️ Ver
-            </button>
-            <button class="delete-btn" data-id="${p._id}" data-type="post">
-              🗑️ Eliminar
-            </button>
-          </td>
-        </tr>`;
-    });
-
-    asignarEventos();
-
   } catch (err) {
-    console.error("Error cargando datos:", err);
-    alert("❌ No se pudo conectar con el servidor.");
+    console.error("Error al iniciar sesión de admin:", err);
+    res.status(500).json({ error: "Error al iniciar sesión" });
   }
-}
-
-// ===============================
-// 🗑️ Evento Eliminar user/post
-// ===============================
-function asignarEventos() {
-  document.querySelectorAll(".delete-btn").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.dataset.id;
-      const type = btn.dataset.type;
-
-      if (!confirm(`¿Eliminar este ${type === "user" ? "usuario" : "post"}?`))
-        return;
-
-      try {
-        const res = await fetch(
-          `${type === "user" ? API_USERS : API_POSTS}/${id}`,
-          {
-            method: "DELETE",
-            credentials: "include"
-          }
-        );
-
-        if (!res.ok) throw new Error("Error en eliminación");
-
-        alert(
-          `${
-            type === "user" ? "Usuario" : "Publicación"
-          } eliminado correctamente ✔`
-        );
-
-        cargarDatos();
-
-      } catch (error) {
-        console.error(error);
-        alert("❌ No se pudo eliminar.");
-      }
-    });
-  });
-
-
-  document.querySelectorAll(".view-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      modalTitle.textContent = `Publicación de ${btn.dataset.autor}`;
-      modalContent.innerHTML = `
-        <p>${btn.dataset.texto}</p>
-        ${
-          btn.dataset.imagen
-            ? `<img src="${btn.dataset.imagen}" class="modal-img">`
-            : "<p>Sin imagen</p>"
-        }`;
-
-      modal.style.display = "flex";
-    });
-  });
-}
-
-// ===============================
-// 👁️ Cerrar modal
-// ===============================
-closeModal.addEventListener("click", () => (modal.style.display = "none"));
-window.addEventListener("click", e => {
-  if (e.target === modal) modal.style.display = "none";
 });
 
-// ===============================
-// 🚀 Ejecutar carga inicial
-// ===============================
-cargarDatos();
+/* ============================================================
+   👥 OBTENER TODOS LOS USUARIOS
+============================================================ */
+router.get("/usuarios", async (req, res) => {
+  try {
+    const usuarios = await Usuario.find({}, "username correo rol").lean();
+    res.json(usuarios);
+  } catch (err) {
+    console.error("Error al obtener usuarios:", err);
+    res.status(500).json({ error: "Error al obtener usuarios" });
+  }
+});
+
+/* ============================================================
+   📰 OBTENER TODAS LAS PUBLICACIONES
+============================================================ */
+router.get("/publicaciones", async (req, res) => {
+  try {
+    const publicaciones = await Publicacion.find().sort({ ts: -1 }).lean();
+    res.json(publicaciones);
+  } catch (err) {
+    console.error("Error al obtener publicaciones:", err);
+    res.status(500).json({ error: "Error al obtener publicaciones" });
+  }
+});
+
+/* ============================================================
+   🗑️ ELIMINAR USUARIO
+============================================================ */
+router.delete("/usuarios/:id", async (req, res) => {
+  try {
+    const eliminado = await Usuario.findByIdAndDelete(req.params.id);
+    if (!eliminado)
+      return res.status(404).json({ error: "Usuario no encontrado" });
+
+    res.json({ message: "Usuario eliminado correctamente" });
+  } catch (err) {
+    console.error("Error al eliminar usuario:", err);
+    res.status(500).json({ error: "Error al eliminar usuario" });
+  }
+});
+
+/* ============================================================
+   🗑️ ELIMINAR PUBLICACIÓN
+============================================================ */
+router.delete("/publicaciones/:id", async (req, res) => {
+  try {
+    const eliminado = await Publicacion.findByIdAndDelete(req.params.id);
+    if (!eliminado)
+      return res.status(404).json({ error: "Publicación no encontrada" });
+
+    res.json({ message: "Publicación eliminada correctamente" });
+  } catch (err) {
+    console.error("Error al eliminar publicación:", err);
+    res.status(500).json({ error: "Error al eliminar publicación" });
+  }
+});
+
+export default router;

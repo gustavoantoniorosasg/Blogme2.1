@@ -15,8 +15,6 @@ import usuarios from "./routes/usuarios.js";
 import adminRoutes from "./routes/admin.js";
 import publicacionesRoutes from "./routes/publicaciones.js";
 // Seguridad básica para producción
-import helmet from "helmet";
-app.use(helmet());
 
 const app = express();
 

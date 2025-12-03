@@ -1,10 +1,19 @@
 import { API_ADMIN, API_USUARIOS } from "./config.js";
 
-// ===== Wakeup API (Render cold boot) =====
-fetch("https://blogme2-1.onrender.com").catch(()=>{});
+/* ============================================================
+   🔄 Wakeup prevent (Render cold boot)
+============================================================ */
+(async () => {
+  try {
+    await fetch(`${API_USUARIOS}/ping`);
+  } catch (e) {
+    console.log("Backend cold, waking...");
+  }
+})();
 
-
-// ===== Toast UI =====
+/* ============================================================
+   🔔 Toast UI
+============================================================ */
 function showToast(msg, type = "info") {
   let toast = document.getElementById("toast");
 
@@ -19,42 +28,44 @@ function showToast(msg, type = "info") {
 
   setTimeout(() => {
     toast.className = toast.className.replace("show", "");
-  }, 2800);
+  }, 2400);
 }
 
-// Toast styles
-const style = document.createElement("style");
-style.innerHTML = `
-#toast {
-  visibility: hidden;
-  min-width: 260px;
-  background: rgba(0,0,0,0.78);
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 14px;
-  position: fixed;
-  left: 50%;
-  bottom: 35px;
-  transform: translateX(-50%);
-  font-size: 15px;
-  opacity: 0;
-  transition: opacity .4s ease-in-out;
-  z-index: 9999;
-}
+// Inject toast style
+(() => {
+  if (document.getElementById("toast-style")) return;
+  const style = document.createElement("style");
+  style.id = "toast-style";
+  style.innerHTML = `
+    #toast {
+      visibility: hidden;
+      min-width: 260px;
+      background: rgba(0,0,0,0.78);
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 14px;
+      position: fixed;
+      left: 50%;
+      bottom: 35px;
+      transform: translateX(-50%);
+      font-size: 15px;
+      opacity: 0;
+      transition: opacity .4s ease-in-out;
+      z-index: 9999;
+    }
+    #toast.show { visibility: visible; opacity: 1; }
+    #toast.success { background: #28a745d9; }
+    #toast.error { background: #dc3545d9; }
+    #toast.warn { background: #ffc107d9; color: #222; }
+  `;
+  document.head.appendChild(style);
+})();
 
-#toast.show {
-  visibility: visible;
-  opacity: 1;
-}
 
-#toast.success { background: #28a745d9; }
-#toast.error { background: #dc3545d9; }
-#toast.warn { background: #ffc107d9; color: #222; }
-`;
-document.head.appendChild(style);
-
-// Tabs switching
+// ============================================================
+// 🪟 Tab handler
+// ============================================================
 const loginTab = document.getElementById("login-tab");
 const registerTab = document.getElementById("register-tab");
 const loginForm = document.getElementById("login-form");
@@ -74,41 +85,34 @@ registerTab.addEventListener("click", () => {
   loginForm.classList.remove("active");
 });
 
-// Helpers
-function validarUsuario(usuario) {
-  return /^[a-zA-Z0-9_]{3,20}$/.test(usuario);
-}
 
-function validarCorreo(correo) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
-}
+// ============================================================
+// ✍ VALIDACIONES
+// ============================================================
+const validarUsuario = u => /^[a-zA-Z0-9_]{3,20}$/.test(u);
+const validarCorreo = c => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c);
+const validarPassword = p => p.length >= 6;
 
-function validarPassword(pass) {
-  return pass.length >= 6;
-}
 
-// ===== Login =====
+// ============================================================
+// 🔐 LOGIN
+// ============================================================
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const username = loginForm.querySelector('input[type="text"]').value.trim();
   const password = loginForm.querySelector('input[type="password"]').value.trim();
 
-  if (!username || !password) {
-    showToast("Completa todos los campos", "warn");
-    return;
-  }
-
-  if (!validarUsuario(username)) {
-    showToast("Usuario inválido", "warn");
-    return;
-  }
+  if (!username || !password) return showToast("Completa todos los campos", "warn");
+  if (!validarUsuario(username)) return showToast("Usuario inválido", "warn");
 
   try {
-    // Intento admin
+
+    /* ===== ADMIN Login try ===== */
     const adminResp = await fetch(`${API_ADMIN}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ username, password }),
     });
 
@@ -116,37 +120,41 @@ loginForm.addEventListener("submit", async (e) => {
       const data = await adminResp.json();
       localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
       localStorage.setItem("adminSession", "true");
-
       showToast(`Bienvenido administrador: ${data.admin.username}`, "success");
-      setTimeout(() => window.location.href = "admin.html", 900);
-      return;
+      return setTimeout(() => window.location.href = "admin.html", 900);
     }
 
-    // Intento usuario normal
+    /* ===== Usuario normal ===== */
     const userResp = await fetch(`${API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ username, password }),
     });
 
     const data = await userResp.json();
 
-    if (!userResp.ok) {
-      showToast(data.msg || "Credenciales incorrectas", "error");
-      return;
-    }
+    if (!userResp.ok)
+      return showToast(data.msg || "Credenciales incorrectas", "error");
 
     localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
+
     showToast(`Bienvenido ${data.usuario.username}`, "success");
     setTimeout(() => window.location.href = "publicaciones.html", 900);
 
   } catch (err) {
     console.error("Error:", err);
-    showToast("⚠ Servidor no disponible, intenta en 5s", "error");
+    showToast("⚠ Servidor dormido. Intenta nuevamente.", "error");
+
+    // Retry wakeup
+    setTimeout(() => location.reload(), 4500);
   }
 });
 
-// ===== Registro =====
+
+// ============================================================
+// 🆕 REGISTRO
+// ============================================================
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -154,41 +162,34 @@ registerForm.addEventListener("submit", async (e) => {
   const correo = document.getElementById("reg-correo").value.trim();
   const password = document.getElementById("reg-password").value.trim();
 
-  if (!username || !correo || !password) {
-    showToast("Completa todos los campos", "warn");
-    return;
-  }
-
-  if (!validarUsuario(username)) {
-    showToast("Usuario inválido (solo letras, números y _)", "warn");
-    return;
-  }
-
-  if (!validarCorreo(correo)) {
-    showToast("Correo no válido", "warn");
-    return;
-  }
-
-  if (!validarPassword(password)) {
-    showToast("Minimo 6 caracteres", "warn");
-    return;
-  }
+  if (!username || !correo || !password) return showToast("Completa todos los campos", "warn");
+  if (!validarUsuario(username)) return showToast("Usuario inválido (solo letras, números y _)", "warn");
+  if (!validarCorreo(correo)) return showToast("Correo no válido", "warn");
+  if (!validarPassword(password)) return showToast("Mínimo 6 caracteres", "warn");
 
   try {
     const resp = await fetch(`${API_USUARIOS}/registrar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ username, correo, password }),
     });
 
     const data = await resp.json();
 
     if (!resp.ok) {
-      showToast(data.msg || "Error en el registro", "error");
-      return;
+      return showToast(
+        data.msg || (resp.status === 409 ? "Usuario ya existe" : "Error en el registro"),
+        "error"
+      );
     }
 
-    showToast("Cuenta creada con éxito", "success");
+    showToast("Cuenta creada con éxito 🎉", "success");
+
+    // Limpia campos
+    registerForm.reset();
+
+    // Cambia a login
     setTimeout(() => loginTab.click(), 600);
 
   } catch (error) {

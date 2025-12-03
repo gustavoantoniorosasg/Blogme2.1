@@ -1,3 +1,4 @@
+router.get("/ping", (req, res) => res.json({ ok: true }));
 import express from "express";
 import bcrypt from "bcrypt";
 import Usuario from "../models/Usuario.js";

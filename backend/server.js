@@ -20,8 +20,8 @@ const app = express();
 // 🔥 CORS CORRECTO PARA PRODUCCIÓN 🔥
 app.use(cors({
   origin: [
-    "https://blogme2.vercel.app", // ⚠️ Reemplaza con tu URL real si es distinta
-    "https://blogme2-1.vercel.app"
+    "https://blogme2-1-bqhl.vercel.app", // ⚠️ Reemplaza con tu URL real si es distinta
+    "https://blogme2-1-bqhl.vercel.app"
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],

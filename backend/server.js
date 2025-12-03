@@ -19,14 +19,18 @@ import publicacionesRoutes from "./routes/publicaciones.js";
 const app = express();
 
 app.use(express.json());
+
 // Middlewares
 app.use(cors({
-  origin: "https://blogme2-1-bqhl.vercel.app",  // dominio de tu frontend
+  origin: [
+    "https://blogme2-1-bqhl.vercel.app", 
+    "http://localhost:5173",
+    "http://localhost:3000"
+  ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
-
 
 
 app.use((req, res, next) => {

@@ -5,6 +5,14 @@ import Usuario from "../models/Usuario.js";
 const router = express.Router();
 
 /* ===========================================================
+   🌐 Ping — despierta backend (Render boot)
+   GET /api/usuarios/ping
+=========================================================== */
+router.get("/ping", (req, res) => {
+  res.json({ ok: true, msg: "API usuarios activa 🟢" });
+});
+
+/* ===========================================================
    ✅ Registrar usuario
    POST /api/usuarios/registrar
 =========================================================== */
@@ -16,9 +24,14 @@ router.post("/registrar", async (req, res) => {
       return res.status(400).json({ msg: "Todos los campos son obligatorios" });
     }
 
-    const usuarioExistente = await Usuario.findOne({ correo });
+    const usuarioExistente = await Usuario.findOne({
+      $or: [{ correo }, { username }]
+    });
+
     if (usuarioExistente) {
-      return res.status(400).json({ msg: "El correo ya está registrado" });
+      return res.status(400).json({
+        msg: "Correo o usuario ya registrado"
+      });
     }
 
     const hash = await bcrypt.hash(password, 10);
@@ -26,12 +39,23 @@ router.post("/registrar", async (req, res) => {
     const nuevoUsuario = await Usuario.create({
       username,
       correo,
-      password: hash
+      password: hash,
+      rol: "usuario",     // aseguramos rol por defecto
+      avatar: "",
+      bio: ""
     });
 
-    res.json({ msg: "Usuario registrado con éxito", usuario: nuevoUsuario });
+    res.json({
+      msg: "Usuario registrado con éxito",
+      usuario: {
+        id: nuevoUsuario._id,
+        username: nuevoUsuario.username,
+        correo: nuevoUsuario.correo
+      }
+    });
   } catch (error) {
-    res.status(500).json({ msg: "Error en el servidor", error });
+    console.error(error);
+    res.status(500).json({ msg: "Error en el servidor" });
   }
 });
 
@@ -64,12 +88,13 @@ router.post("/login", async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ msg: "Error en el servidor", error });
+    console.error(error);
+    res.status(500).json({ msg: "Error en el servidor" });
   }
 });
 
 /* ===========================================================
-   ✅ Obtener lista de usuarios (solo admin)
+   📌 Lista de usuarios (solo admin)
    GET /api/usuarios/lista
 =========================================================== */
 router.get("/lista", async (req, res) => {
@@ -77,12 +102,13 @@ router.get("/lista", async (req, res) => {
     const usuarios = await Usuario.find().select("-password");
     res.json(usuarios);
   } catch (error) {
-    res.status(500).json({ msg: "Error al obtener usuarios", error });
+    console.error(error);
+    res.status(500).json({ msg: "Error al obtener usuarios" });
   }
 });
 
 /* ===========================================================
-   ✅ Eliminar usuario (solo admin)
+   ❌ Eliminar usuario (solo admin)
    DELETE /api/usuarios/:id
 =========================================================== */
 router.delete("/:id", async (req, res) => {
@@ -90,7 +116,8 @@ router.delete("/:id", async (req, res) => {
     await Usuario.findByIdAndDelete(req.params.id);
     res.json({ msg: "Usuario eliminado" });
   } catch (error) {
-    res.status(500).json({ msg: "Error eliminando usuario", error });
+    console.error(error);
+    res.status(500).json({ msg: "Error eliminando usuario" });
   }
 });
 

@@ -1,13 +1,10 @@
-// ===========================================================
-// Importar configuración global de API
-// ===========================================================
 import { API_ADMIN, API_USUARIOS } from "./config.js";
 
+// ===== Wakeup API (Render cold boot) =====
+fetch("https://blogme2-1.onrender.com").catch(()=>{});
 
-// ===========================================================
-// 🔵 SISTEMA DE TOAST (mensajes bonitos sin alterar diseño)
-// ===========================================================
 
+// ===== Toast UI =====
 function showToast(msg, type = "info") {
   let toast = document.getElementById("toast");
 
@@ -25,7 +22,7 @@ function showToast(msg, type = "info") {
   }, 2800);
 }
 
-// Toast estilos
+// Toast styles
 const style = document.createElement("style");
 style.innerHTML = `
 #toast {
@@ -57,17 +54,12 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 
-
-// ===========================================================
-// Cambiar entre login y registro 
-// ===========================================================
-
+// Tabs switching
 const loginTab = document.getElementById("login-tab");
 const registerTab = document.getElementById("register-tab");
 const loginForm = document.getElementById("login-form");
 const registerForm = document.getElementById("register-form");
 
-// Tabs
 loginTab.addEventListener("click", () => {
   loginTab.classList.add("active");
   registerTab.classList.remove("active");
@@ -82,11 +74,7 @@ registerTab.addEventListener("click", () => {
   loginForm.classList.remove("active");
 });
 
-
-// ===========================================================
-// 🟦 VALIDACIONES PROFESIONALES
-// ===========================================================
-
+// Helpers
 function validarUsuario(usuario) {
   return /^[a-zA-Z0-9_]{3,20}$/.test(usuario);
 }
@@ -99,11 +87,7 @@ function validarPassword(pass) {
   return pass.length >= 6;
 }
 
-
-// ===========================================================
-// 🔐 LOGIN — Administradores y Usuarios
-// ===========================================================
-
+// ===== Login =====
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -116,12 +100,12 @@ loginForm.addEventListener("submit", async (e) => {
   }
 
   if (!validarUsuario(username)) {
-    showToast("El usuario es inválido", "warn");
+    showToast("Usuario inválido", "warn");
     return;
   }
 
   try {
-    // 1️⃣ Intentar login como ADMIN
+    // Intento admin
     const adminResp = await fetch(`${API_ADMIN}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -138,7 +122,7 @@ loginForm.addEventListener("submit", async (e) => {
       return;
     }
 
-    // 2️⃣ Intentar login como usuario normal
+    // Intento usuario normal
     const userResp = await fetch(`${API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -158,15 +142,11 @@ loginForm.addEventListener("submit", async (e) => {
 
   } catch (err) {
     console.error("Error:", err);
-    showToast("No se pudo conectar al servidor", "error");
+    showToast("⚠ Servidor no disponible, intenta en 5s", "error");
   }
 });
 
-
-// ===========================================================
-// 🟩 REGISTRO — Usuarios reales (FUNCIONANDO AL 100%)
-// ===========================================================
-
+// ===== Registro =====
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -190,7 +170,7 @@ registerForm.addEventListener("submit", async (e) => {
   }
 
   if (!validarPassword(password)) {
-    showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
+    showToast("Minimo 6 caracteres", "warn");
     return;
   }
 
@@ -213,6 +193,6 @@ registerForm.addEventListener("submit", async (e) => {
 
   } catch (error) {
     console.error("Error:", error);
-    showToast("Error al conectar con el servidor", "error");
+    showToast("Servidor no disponible", "error");
   }
 });

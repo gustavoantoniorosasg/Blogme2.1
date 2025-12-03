@@ -14,7 +14,7 @@ import { API_ADMIN, API_USUARIOS, API_PUBLICACIONES } from "./config.js";
   /* =======================
      CONFIG / SELECTORS
   ======================= */
-  const API_BASE = '/api/publicaciones';
+const API_BASE = 'https://miapp.onrender.com/api/publicaciones';
   const POSTS_KEY = 'blogme_posts';
   const SAVED_KEY = 'blogme_saved';
   const PROFILE_PREFIX = 'blogme_profile_';

@@ -121,12 +121,12 @@ loginForm.addEventListener("submit", async (e) => {
   }
 
   try {
-    // 1️⃣ Intentar login como ADMIN
-    const adminResp = await fetch(`${API_ADMIN}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
+   const adminResp = await fetch(`${API_ADMIN}/login`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
+  body: JSON.stringify({ username, password }),
+});
 
     if (adminResp.ok) {
       const data = await adminResp.json();
@@ -140,10 +140,12 @@ loginForm.addEventListener("submit", async (e) => {
 
     // 2️⃣ Intentar login como usuario normal
     const userResp = await fetch(`${API_USUARIOS}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
+  body: JSON.stringify({ username, password }),
+});
+
 
     const data = await userResp.json();
 
@@ -196,10 +198,11 @@ registerForm.addEventListener("submit", async (e) => {
 
   try {
     const resp = await fetch(`${API_USUARIOS}/registrar`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, correo, password }),
-    });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
+  body: JSON.stringify({ username, correo, password }),
+});
 
     const data = await resp.json();
 

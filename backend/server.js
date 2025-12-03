@@ -20,12 +20,20 @@ const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: "*",
+  origin: "https://blogme2-1-bqhl.vercel.app",  // dominio de tu frontend
+  credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
+
+
 app.use(express.json());
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+});
 
 // 🔹 Conexión MongoDB usando .env
 const conectarDB = async () => {

@@ -139,12 +139,13 @@ loginForm.addEventListener("submit", async (e) => {
     }
 
     // 2️⃣ Intentar login como usuario normal
-    const userResp = await fetch(`${API_USUARIOS}/login`, {
+    fetch(`${API_USUARIOS}/login`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
-  credentials: "include",
   body: JSON.stringify({ username, password }),
-});
+  credentials: "include"
+})
+
 
 
     const data = await userResp.json();

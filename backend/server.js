@@ -14,28 +14,19 @@ import Admin from "./models/Admin.js";
 import usuarios from "./routes/usuarios.js";
 import adminRoutes from "./routes/admin.js";
 import publicacionesRoutes from "./routes/publicaciones.js";
+// Seguridad básica para producción
 
 const app = express();
 
-// 🔥 CORS CORRECTO PARA PRODUCCIÓN 🔥
 app.use(cors({
-  origin: [
-    "https://blogme2-1-bqhl.vercel.app", // ⚠️ Reemplaza con tu URL real si es distinta
-    "https://blogme2-1-bqhl.vercel.app"
-  ],
-  credentials: true,
+  origin: "*",
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// 🔹 habilitar cookies/sesión si fuese necesario
-app.set("trust proxy", 1);
-
 app.use(express.json());
 
-// ===============================
-// 🔌 Conexión MongoDB Atlas
-// ===============================
+// 🔹 Conexión MongoDB usando .env
 const conectarDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
@@ -49,9 +40,7 @@ const conectarDB = async () => {
   }
 };
 
-// ===============================
-// 👑 Crear Admin por defecto
-// ===============================
+// 🔹 Crear Admin por defecto
 const crearAdminPorDefecto = async () => {
   try {
     const existeAdmin = await Admin.findOne({ username: "admin" });
@@ -72,14 +61,10 @@ const crearAdminPorDefecto = async () => {
   }
 };
 
-// conectar BD
+// Conectar BD
 conectarDB();
 
-// ===============================
-// 📌 Rutas API reales
-// ===============================
-app.get("/api/usuarios/ping", (req, res) => res.json({ ok: true }));
-
+// Rutas API
 app.get("/", (req, res) =>
   res.send("🚀 API BlogMe funcionando correctamente")
 );
@@ -88,16 +73,12 @@ app.use("/api/usuarios", usuarios);
 app.use("/api/admin", adminRoutes);
 app.use("/api/publicaciones", publicacionesRoutes);
 
-// ===============================
-// ❌ Ruta NO encontrada
-// ===============================
+// Ruta NO encontrada
 app.use((req, res) => {
   res.status(404).json({ msg: "Ruta no encontrada" });
 });
 
-// ===============================
-// 🚀 Servidor escuchando
-// ===============================
+// Servidor activo
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () =>
   console.log(`🔥 Backend activo en puerto http://localhost:${PORT}`)

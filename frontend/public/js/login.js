@@ -7,6 +7,7 @@ import { API_ADMIN, API_USUARIOS } from "./config.js";
 // ===========================================================
 // 🔵 SISTEMA DE TOAST (mensajes bonitos sin alterar diseño)
 // ===========================================================
+const API = "https://blogme2-1.onrender.com";
 
 function showToast(msg, type = "info") {
   let toast = document.getElementById("toast");
@@ -198,12 +199,13 @@ registerForm.addEventListener("submit", async (e) => {
   }
 
   try {
-    const resp = await fetch(`${API_USUARIOS}/registrar`, {
+    fetch(`${API_USUARIOS}/registrar`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
-  credentials: "include",
   body: JSON.stringify({ username, correo, password }),
-});
+  credentials: "include"
+})
+
 
     const data = await resp.json();
 

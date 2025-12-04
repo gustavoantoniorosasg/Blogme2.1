@@ -19,6 +19,8 @@ import publicacionesRoutes from "./routes/publicaciones.js";
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 // Middlewares
 app.use(cors({

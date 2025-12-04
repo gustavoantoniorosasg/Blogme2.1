@@ -3,7 +3,7 @@
 // ===============================================================
 
 // URL del backend
-const API_ADMIN = `${API_BASE}/api/admin`;
+
 const API_USUARIOS = `${API_BASE_URL}/api/usuarios`;
 
 
@@ -13,7 +13,6 @@ const API_BASE_URL = "https://blogme2-1.onrender.com";
 
 const registerForm = document.getElementById("register-form");
 const registerMsg = document.getElementById("register-msg");
-
 const regUsername = document.getElementById("reg-username");
 const regCorreo = document.getElementById("reg-correo");
 const regPassword = document.getElementById("reg-password");

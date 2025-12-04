@@ -6,7 +6,7 @@
 const API_ADMIN = "https://blogme2-1.onrender.com/api/admin";
 const API_USUARIOS = "https://blogme2-1.onrender.com/api/usuarios";
 
-
+import { API_ADMIN, API_USUARIOS } from "../../src/js/config.js";
 
 // Inputs correctos con ID
 const API_BASE_URL = "https://blogme2-1.onrender.com";

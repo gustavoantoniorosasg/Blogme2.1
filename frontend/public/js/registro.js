@@ -3,9 +3,14 @@
 // ===============================================================
 
 // URL del backend
-const API_USUARIOS = "http://localhost:4000/api/usuarios";
+const API_ADMIN = "https://blogme2-1.onrender.com/api/admin";
+const API_USUARIOS = "https://blogme2-1.onrender.com/api/usuarios";
+
+
 
 // Inputs correctos con ID
+const API_BASE_URL = "https://blogme2-1.onrender.com";
+
 const registerForm = document.getElementById("register-form");
 const registerMsg = document.getElementById("register-msg");
 
@@ -54,11 +59,12 @@ registerForm.addEventListener("submit", async (e) => {
   }
 
   try {
-    const resp = await fetch(`${API_USUARIOS}/registrar`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, correo, password }),
-    });
+   const resp = await fetch(`${API_USUARIOS}/registrar`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ username, correo, password }),
+  credentials: "include"
+});
 
     const data = await resp.json();
 

@@ -1,6 +1,9 @@
 // ===========================================================
 // Importar configuración global de API
 // ===========================================================
+const API_ADMIN = "https://blogme2-1.onrender.com/api/admin";
+const API_USUARIOS = "https://blogme2-1.onrender.com/api/usuarios";
+
 import { API_ADMIN, API_USUARIOS } from "../../src/js/config.js";
 
 
@@ -140,12 +143,12 @@ loginForm.addEventListener("submit", async (e) => {
     }
 
     // 2️⃣ Intentar login como usuario normal
-    fetch(`${API_USUARIOS}/login`, {
+    const userResp = await fetch(`${API_USUARIOS}/login`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ username, password }),
-  credentials: "include"
-})
+  body: JSON.stringify({ username, password })
+});
+
 
 
 
@@ -199,12 +202,13 @@ registerForm.addEventListener("submit", async (e) => {
   }
 
   try {
-    fetch(`${API_USUARIOS}/registrar`, {
+    const userResp = await fetch(`${API_USUARIOS}/login`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ username, correo, password }),
+  body: JSON.stringify({ username, password }),
   credentials: "include"
-})
+});
+
 
 
     const data = await resp.json();

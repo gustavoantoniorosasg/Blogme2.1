@@ -1,4 +1,4 @@
-
+const API_ADMIN = `${API_BASE}/api/admin`;
 //  REGISTRO REAL DE USUARIO — BlogMe
 // ===============================================================
 

@@ -32,6 +32,9 @@
 
   // Optional inputs for file upload in the page (if exist)
   const inputFileGlobal = $('#newImg'); // could be present in page
+const logo = document.createElement('img');
+logo.src = '/assets/images/logo.jpg';
+document.body.appendChild(logo);
 
   /* =======================
      STATE

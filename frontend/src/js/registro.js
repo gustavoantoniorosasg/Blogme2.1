@@ -1,10 +1,11 @@
 const API_ADMIN = `${API_BASE}/api/admin`;
+const API_USUARIOS = `${API_BASE_URL}/api/usuarios`;
 //  REGISTRO REAL DE USUARIO — BlogMe
 // ===============================================================
 
 // URL del backend
 
-const API_USUARIOS = `${API_BASE_URL}/api/usuarios`;
+
 
 
 

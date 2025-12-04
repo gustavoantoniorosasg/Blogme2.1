@@ -6,9 +6,6 @@ const API_USUARIOS = `${API_BASE_URL}/api/usuarios`;
 // URL del backend
 
 
-
-
-
 // Inputs correctos con ID
 const API_BASE_URL = "https://blogme2-1.onrender.com";
 

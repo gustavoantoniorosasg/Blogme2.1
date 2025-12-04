@@ -3,8 +3,8 @@
 // ===============================================================
 
 // URL del backend
-const API_ADMIN = "https://blogme2-1.onrender.com/api/admin";
-
+const API_ADMIN = `${API_BASE}/api/admin`;
+const API_USUARIOS = `${API_BASE_URL}/api/usuarios`;
 
 
 

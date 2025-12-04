@@ -4,7 +4,7 @@
 
 // URL del backend
 const API_ADMIN = "https://blogme2-1.onrender.com/api/admin";
-const API_USUARIOS = "https://blogme2-1.onrender.com/api/usuarios";
+
 
 
 

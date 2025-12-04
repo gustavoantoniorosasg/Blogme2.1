@@ -1,10 +1,9 @@
 // ===========================================================
 // Importar configuración global de API
 // ===========================================================
-const API_ADMIN = "https://blogme2-1.onrender.com/api/admin";
-const API_USUARIOS = "https://blogme2-1.onrender.com/api/usuarios";
-
-
+const API_ADMIN = `${API_BASE_URL}/api/admin`;
+const API_USUARIOS = `${API_BASE_URL}/api/usuarios`;
+  
 
 // ===========================================================
 // 🔵 SISTEMA DE TOAST (mensajes bonitos sin alterar diseño)

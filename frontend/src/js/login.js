@@ -4,8 +4,6 @@
 const API_ADMIN = "https://blogme2-1.onrender.com/api/admin";
 const API_USUARIOS = "https://blogme2-1.onrender.com/api/usuarios";
 
-import { API_ADMIN, API_USUARIOS } from "./config.js";
-
 
 
 // ===========================================================

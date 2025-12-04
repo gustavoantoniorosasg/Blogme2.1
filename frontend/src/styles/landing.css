@@ -100,8 +100,3 @@ header.nav {
   .hero-right{ width:100%; }
   .nav-links{ gap:6px; }
 }
-.header {
-  background-image: url('/assets/images/logo.jpg');
-  background-size: contain;
-  background-repeat: no-repeat;
-}

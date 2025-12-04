@@ -1,7 +1,7 @@
 // ===========================================================
 // Importar configuración global de API
 // ===========================================================
-import { API_ADMIN, API_USUARIOS } from "./config.js";
+import { API_ADMIN, API_USUARIOS } from "../../src/js/config.js";
 
 
 // ===========================================================

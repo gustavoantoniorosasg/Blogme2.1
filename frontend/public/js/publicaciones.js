@@ -6,7 +6,7 @@
    - Integración con comments.js via window.openComments(postId)
    - Optimistic UI y parcheo (solo actualiza HTML necesario)
 */
-import { API_ADMIN, API_USUARIOS, API_PUBLICACIONES } from "../../public/js/config.js";
+import { API_ADMIN, API_USUARIOS, API_PUBLICACIONES } from "../../src/js/config.js";
 
 (() => {
   'use strict';

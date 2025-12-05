@@ -1,26 +1,26 @@
 /* ===========================================================
-   🌐 CONFIG GLOBAL DE BLOGME
-   Funciona en producción (Render) y en desarrollo (localhost)
+   🌐 CONFIG BLOGME — Producción y Local
 =========================================================== */
 
-// Detecta si estás en Render o local
-const IS_RENDER = window.location.hostname.includes("onrender.com");
+// Detecta si estás en un dominio de producción (Vercel o Render)
+const HOST = window.location.hostname;
+const IS_PRODUCTION =
+  HOST.includes("vercel.app") || HOST.includes("onrender.com");
 
-// URL BASE automática
-window.API_BASE_URL = window.location.hostname.includes("vercel.app")
+// URL automática
+window.API_BASE_URL = IS_PRODUCTION
   ? "https://blogme2-1.onrender.com"
   : "http://localhost:3000";
 
+// Endpoints API globales
+window.API_ADMIN = `${API_BASE_URL}/api/admin`;
+window.API_USUARIOS = `${API_BASE_URL}/api/usuarios`;
+window.API_PUBLICACIONES = `${API_BASE_URL}/api/publicaciones`;
 
-// Rutas API correctas
-window.API_ADMIN = `${window.API_BASE_URL}/api/admin`;
-window.API_USUARIOS = `${window.API_BASE_URL}/api/usuarios`;
-window.API_PUBLICACIONES = `${window.API_BASE_URL}/api/publicaciones`;
-
-// Para despertar backend en Render
+// Ping para despertar backend
 window.wakeBackend = async function () {
   try {
-    await fetch(`${window.API_BASE_URL}/api/ping`, { method: "GET" });
+    await fetch(`${API_BASE_URL}/api/ping`);
   } catch (e) {}
 };
 
@@ -44,5 +44,5 @@ window.getUser = function () {
 window.logout = function () {
   localStorage.removeItem("usuarioActivo");
   localStorage.removeItem("adminSession");
-  window.location.href = "login.html";
+  window.location.href = "/pages/login.html"; // <-- Ruta correcta en deploy
 };

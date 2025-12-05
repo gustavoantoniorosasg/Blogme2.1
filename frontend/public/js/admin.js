@@ -1,6 +1,6 @@
 /* =========================================================================
-   🛡️ BLOGME PANEL ADMIN — Versión PRO Optimizada
-   UX Premium • Animaciones • Código limpio • Zero errores
+   🛡️ BLOGME — PANEL ADMIN PRO
+   Limpio • Seguro • Compatible con config.js global
 =========================================================================== */
 
 /* =========================================================================
@@ -12,17 +12,17 @@ if (!localStorage.getItem("adminSession")) {
 }
 
 /* =========================================================================
-   🚪 CERRAR SESIÓN
+   🚪 CERRAR SESIÓN GLOBAL (usa logout() de config.js)
 =========================================================================== */
 document.getElementById("logout-btn").addEventListener("click", () => {
-  localStorage.removeItem("adminSession");
-  window.location.href = "login.html";
+  logout();
 });
 
 /* =========================================================================
-   🌐 CONFIG GLOBAL
+   🌐 API GLOBAL (tomado desde config.js)
 =========================================================================== */
-const API_URL = "http://localhost:4000/api/admin";
+const API_URL = `${API_ADMIN}`; // api/admin
+const API_POSTS = `${API_PUBLICACIONES}`; // api/publicaciones
 
 const userTable = document.querySelector("#usersTable tbody");
 const postTable = document.querySelector("#postsTable tbody");
@@ -30,13 +30,11 @@ const postTable = document.querySelector("#postsTable tbody");
 /* =========================================================================
    📦 MODALES
 =========================================================================== */
-// Modal de visualización
 const modal = document.getElementById("viewModal");
 const modalTitle = document.getElementById("modalTitle");
 const modalContent = document.getElementById("modalContent");
 const closeModal = document.getElementById("closeModal");
 
-// Modal de confirmación
 const confirmModal = document.getElementById("confirmModal");
 const confirmText = document.getElementById("confirmText");
 const confirmCancel = document.getElementById("confirmCancel");
@@ -44,34 +42,27 @@ const confirmOk = document.getElementById("confirmOk");
 
 let confirmResolve;
 
-// Modal de éxito
 const successModal = document.getElementById("successModal");
 const successText = document.getElementById("successText");
 const successOk = document.getElementById("successOk");
 
-// Loader
 const loader = document.getElementById("loader");
 
 /* =========================================================================
-   🔄 LOADER ANIMADO
+   🔄 LOADER
 =========================================================================== */
-function mostrarLoader() {
-  loader.style.display = "flex";
-}
-
-function ocultarLoader() {
-  loader.style.display = "none";
-}
+function mostrarLoader() { loader.style.display = "flex"; }
+function ocultarLoader() { loader.style.display = "none"; }
 
 /* =========================================================================
-   📥 CARGAR DATOS DESDE BACKEND (USUARIOS + POSTS)
+   📥 CARGAR USUARIOS + PUBLICACIONES
 =========================================================================== */
 async function cargarDatos() {
   try {
     mostrarLoader();
 
-    /* ========== 👥 Usuarios ========== */
-    const resUsuarios = await fetch(`${API_URL}/usuarios`);
+    /* --- 👥 USUARIOS --- */
+    const resUsuarios = await fetch(`${API_URL}/lista`);
     if (!resUsuarios.ok) throw new Error("Error al obtener usuarios");
 
     const usuarios = await resUsuarios.json();
@@ -81,7 +72,7 @@ async function cargarDatos() {
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>${u.username}</td>
-        <td>${u.correo || u.email || "Sin correo"}</td>
+        <td>${u.correo || "Sin correo"}</td>
         <td>${u.rol || "usuario"}</td>
         <td>
           <button class="delete-btn" data-id="${u._id}" data-type="user">
@@ -92,8 +83,8 @@ async function cargarDatos() {
       userTable.appendChild(row);
     });
 
-    /* ========== 📰 Publicaciones ========== */
-    const resPosts = await fetch(`${API_URL}/publicaciones`);
+    /* --- 📰 PUBLICACIONES --- */
+    const resPosts = await fetch(`${API_POSTS}/lista`);
     if (!resPosts.ok) throw new Error("Error al obtener publicaciones");
 
     const posts = await resPosts.json();
@@ -101,7 +92,7 @@ async function cargarDatos() {
 
     posts.forEach(p => {
       const autor = p.author || "Usuario eliminado";
-      const avatar = p.authorAvatar || "../img/default-avatar.png";
+      const avatar = p.authorAvatar || "assets/img/default-avatar.png";
       const textoCorto = p.content.length > 40
         ? p.content.substring(0, 40) + "..."
         : p.content;
@@ -130,11 +121,11 @@ async function cargarDatos() {
           </button>
         </td>
       `;
-
       postTable.appendChild(row);
     });
 
     asignarEventos();
+
   } catch (err) {
     console.error(err);
     alert("❌ Error: No se pudo conectar con el servidor.");
@@ -144,10 +135,10 @@ async function cargarDatos() {
 }
 
 /* =========================================================================
-   🗑 EVENTOS DE ELIMINAR + VER
+   🗑 EVENTOS (ELIMINAR + VER)
 =========================================================================== */
 function asignarEventos() {
-  /* ========== 🔥 ELIMINAR ========== */
+  /* --- ELIMINAR --- */
   document.querySelectorAll(".delete-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
       const id = btn.dataset.id;
@@ -159,10 +150,12 @@ function asignarEventos() {
       if (!ok) return;
 
       try {
-        const res = await fetch(
-          `${API_URL}/${type === "user" ? "usuarios" : "publicaciones"}/${id}`,
-          { method: "DELETE" }
-        );
+        const endpoint =
+          type === "user"
+            ? `${API_URL}/${id}`
+            : `${API_POSTS}/${id}`;
+
+        const res = await fetch(endpoint, { method: "DELETE" });
 
         if (!res.ok) throw new Error("Error al eliminar");
 
@@ -173,12 +166,12 @@ function asignarEventos() {
         cargarDatos();
       } catch (err) {
         console.error(err);
-        alert("❌ No se pudo eliminar");
+        alert("❌ No se pudo eliminar.");
       }
     });
   });
 
-  /* ========== 👁 VER PUBLICACIÓN ========== */
+  /* --- VER PUBLICACIÓN --- */
   document.querySelectorAll(".view-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const texto = btn.dataset.texto;
@@ -188,9 +181,7 @@ function asignarEventos() {
       modalTitle.textContent = `Publicación de ${autor}`;
       modalContent.innerHTML = `
         <p>${texto}</p>
-        ${imagen ?
-          `<img src="${imagen}" class="modal-img">`
-          : "<p>Sin imagen</p>"}
+        ${imagen ? `<img src="${imagen}" class="modal-img">` : "<p>Sin imagen</p>"}
       `;
 
       modal.style.display = "flex";
@@ -199,7 +190,7 @@ function asignarEventos() {
 }
 
 /* =========================================================================
-   🧾 MODAL DE CONFIRMACIÓN
+   📌 MODALES DE CONFIRMACIÓN
 =========================================================================== */
 function customConfirm(message) {
   confirmText.textContent = message;
@@ -209,36 +200,32 @@ function customConfirm(message) {
     confirmResolve = resolve;
   });
 }
-
 confirmCancel.addEventListener("click", () => {
   confirmModal.style.display = "none";
   confirmResolve(false);
 });
-
 confirmOk.addEventListener("click", () => {
   confirmModal.style.display = "none";
   confirmResolve(true);
 });
 
 /* =========================================================================
-   🎉 MODAL DE ÉXITO
+   🎉 MODAL DE EXITO
 =========================================================================== */
 function mostrarSuccess(msg) {
   successText.textContent = msg;
   successModal.style.display = "flex";
 }
-
 successOk.addEventListener("click", () => {
   successModal.style.display = "none";
 });
 
 /* =========================================================================
-   ❌ CERRAR MODAL DE VER
+   ❌ CERRAR MODAL VER
 =========================================================================== */
 closeModal.addEventListener("click", () => {
   modal.style.display = "none";
 });
-
 window.addEventListener("click", e => {
   if (e.target === modal) modal.style.display = "none";
 });

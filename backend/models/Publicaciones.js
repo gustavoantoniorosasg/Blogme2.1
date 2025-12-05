@@ -2,12 +2,21 @@ import mongoose from "mongoose";
 
 const PublicacionSchema = new mongoose.Schema({
   author: { type: String, required: true },
-  authorAvatar: { type: String, default: "" },
+  authorId: { type: String, required: true },
+  authorAvatar: { type: String, required: true },
   content: { type: String, required: true },
-  img: { type: String, default: "" },
-  likes: { type: Number, default: 0 },
-  likedByMe: { type: Boolean, default: false },
-  ts: { type: Date, default: Date.now }
+  imgs: { type: [String], default: [] },
+  ts: { type: Number, default: Date.now },
+  reports: {
+    type: [
+      {
+        reason: String,
+        reporter: String,
+        ts: Number
+      }
+    ],
+    default: []
+  }
 });
 
-export default mongoose.model("Publicacion", PublicacionSchema, "publicaciones");
+export default mongoose.model("Publicacion", PublicacionSchema);

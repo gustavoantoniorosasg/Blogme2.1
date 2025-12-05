@@ -1,12 +1,10 @@
-/* publicaciones.js — Integrado con backend (/api/publicaciones) + fallback localStorage
+/* publicaciones.js — Versión corregida y compatible con /api/publicaciones
    - Usa endpoints REST cuando estén disponibles
    - Fallback localStorage si el backend no responde
-   - Reacciones por usuario (toggle)
-   - Imágenes persistentes (intenta upload, si no: dataURL local)
+   - Reacciones por usuario (local optimistic, intenta backend)
+   - Imágenes: intenta subir por FormData, si falla guarda dataURL local
    - Integración con comments.js via window.openComments(postId)
-   - Optimistic UI y parcheo (solo actualiza HTML necesario)
 */
-
 
 (() => {
   'use strict';
@@ -15,6 +13,7 @@
      CONFIG / SELECTORS
   ======================= */
   const API_BASE = 'https://blogme2-1.onrender.com';
+  const API_PUBLICACIONES = `${API_BASE}/api/publicaciones`; // <<-- ruta principal
   const POSTS_KEY = 'blogme_posts';
   const SAVED_KEY = 'blogme_saved';
   const PROFILE_PREFIX = 'blogme_profile_';
@@ -67,13 +66,25 @@
 
   /* =======================
      LOAD CURRENT USER
+     (login.js guarda usuarioActivo como JSON)
   ======================= */
   function loadCurrentUser(){
-    const ukey = localStorage.getItem('usuarioActivo') || null;
-    if (!ukey) { currentUser = { id:'anon', name:'Invitado', avatar: DEFAULT_AVATAR }; return; }
-    const profile = storageGet(PROFILE_PREFIX + ukey, null);
-    if (profile) currentUser = { id: ukey, name: profile.name || ukey, avatar: profile.avatar || DEFAULT_AVATAR };
-    else currentUser = { id: ukey, name: ukey, avatar: DEFAULT_AVATAR };
+    const raw = localStorage.getItem('usuarioActivo');
+    if (!raw) { currentUser = { id:'anon', name:'Invitado', avatar: DEFAULT_AVATAR }; return; }
+    try {
+      const uobj = JSON.parse(raw);
+      // uobj puede ser { id, username, ... } o { username, ... } según backend
+      const id = uobj.id || uobj._id || uobj.username || uobj.username || uobj.nombre || JSON.stringify(uobj);
+      const name = uobj.username || uobj.nombre || uobj.name || id;
+      const avatar = uobj.avatar || uobj.authorAvatar || DEFAULT_AVATAR;
+      currentUser = { id, name, avatar };
+    } catch(e) {
+      // si no es JSON, usarlo como id string
+      const id = raw;
+      const profile = storageGet(PROFILE_PREFIX + id, null);
+      if (profile) currentUser = { id, name: profile.name || id, avatar: profile.avatar || DEFAULT_AVATAR };
+      else currentUser = { id, name: id, avatar: DEFAULT_AVATAR };
+    }
   }
 
   /* =======================
@@ -97,7 +108,7 @@
   ======================= */
   async function apiFetchPosts(){
     try {
-      const r = await fetchWithTimeout(API_BASE, {}, 7000);
+      const r = await fetchWithTimeout(`${API_PUBLICACIONES}`, {}, 7000);
       if (!r.ok) throw new Error('no-ok');
       return await r.json();
     } catch(e) {
@@ -110,13 +121,17 @@
     try {
       if (file) {
         const fd = new FormData();
-        Object.entries(payload).forEach(([k,v]) => fd.append(k, typeof v === 'object' ? JSON.stringify(v) : v));
-        fd.append('image', file);
-        const r = await fetchWithTimeout(API_BASE, { method:'POST', body: fd }, 15000);
+        // append fields (stringify arrays/objects)
+        Object.entries(payload).forEach(([k,v]) => {
+          if (typeof v === 'object') fd.append(k, JSON.stringify(v));
+          else fd.append(k, v);
+        });
+        fd.append('image', file); // backend should accept multipart/form-data
+        const r = await fetchWithTimeout(`${API_PUBLICACIONES}`, { method:'POST', body: fd }, 20000);
         if (!r.ok) throw new Error('no-ok');
         return await r.json();
       } else {
-        const r = await fetchWithTimeout(API_BASE, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }, 9000);
+        const r = await fetchWithTimeout(`${API_PUBLICACIONES}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }, 10000);
         if (!r.ok) throw new Error('no-ok');
         return await r.json();
       }
@@ -128,7 +143,7 @@
 
   async function apiSendReaction(postId, emoji){
     try {
-      const r = await fetchWithTimeout(`${API_BASE}/${postId}/reaction`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ reaction: emoji, user: currentUser.id }) }, 7000);
+      const r = await fetchWithTimeout(`${API_PUBLICACIONES}/${postId}/reaction`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ reaction: emoji, user: currentUser.id }) }, 7000);
       if (!r.ok) throw new Error('no-ok');
       return await r.json();
     } catch(e) {
@@ -139,7 +154,7 @@
 
   async function apiUpdatePost(postId, payload){
     try {
-      const r = await fetchWithTimeout(`${API_BASE}/${postId}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }, 8000);
+      const r = await fetchWithTimeout(`${API_PUBLICACIONES}/${postId}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }, 8000);
       if (!r.ok) throw new Error('no-ok');
       return await r.json();
     } catch(e) {
@@ -150,7 +165,7 @@
 
   async function apiDeletePost(postId){
     try {
-      const r = await fetchWithTimeout(`${API_BASE}/${postId}`, { method:'DELETE' }, 7000);
+      const r = await fetchWithTimeout(`${API_PUBLICACIONES}/${postId}`, { method:'DELETE' }, 7000);
       if (!r.ok) throw new Error('no-ok');
       return true;
     } catch(e) {
@@ -163,7 +178,7 @@
     try {
       const fd = new FormData();
       fd.append('image', file);
-      const r = await fetchWithTimeout(`${API_BASE}/${postId}/image`, { method:'POST', body: fd }, 15000);
+      const r = await fetchWithTimeout(`${API_PUBLICACIONES}/${postId}/image`, { method:'POST', body: fd }, 15000);
       if (!r.ok) throw new Error('no-ok');
       return await r.json();
     } catch(e) {
@@ -254,7 +269,7 @@
     slice.forEach(p => feedEl.insertAdjacentHTML('beforeend', renderPostCard(p)));
     offset += PAGE_SIZE;
     attachListenersToVisible();
-    loaderEl && (loaderEl.style.display = offset < posts.length ? 'block' : 'none');
+    loaderEl && (loader.style && (loaderEl.style.display = offset < posts.length ? 'block' : 'none'));
   }
 
   /* =======================
@@ -542,7 +557,7 @@
     const reason = prompt('¿Por qué reportas esta publicación? (opcional)');
     if (!reason) { showToast('Reporte cancelado', 'info'); return; }
     // Try sending to backend if endpoint exists
-    fetchWithTimeout(`${API_BASE}/${postId}/report`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ reason, reporter: currentUser.id }) }, 7000)
+    fetchWithTimeout(`${API_PUBLICACIONES}/${postId}/report`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ reason, reporter: currentUser.id }) }, 7000)
       .then(()=> showToast('Reporte enviado', 'success'))
       .catch(()=> showToast('No fue posible enviar el reporte (offline)', 'info'));
   }
@@ -625,6 +640,7 @@
      Small UI helpers
   ======================= */
   function showToast(msg, type='info'){
+    // Prefer global UI if exists
     if (window.ui && typeof window.ui.showToast === 'function') { window.ui.showToast(msg, type); return; }
     const t = document.createElement('div'); t.className = `mini-toast ${type}`; t.textContent = msg;
     document.body.appendChild(t);
@@ -754,7 +770,7 @@
   };
 
   /* =======================
-     Duplicate helper defs (avoid linter warnings in some envs)
+     Duplicate helper defs (compat)
   ======================= */
   function storageSetLocal(key,val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
   function storageGetLocal(key, fallback=null){ try{ return JSON.parse(localStorage.getItem(key)) ?? fallback; }catch(e){return fallback;} }
@@ -763,200 +779,4 @@
   function loadLocalPosts(){ return storageGetLocal(POSTS_KEY, []) || []; }
   function loadSaved(){ saved = storageGetLocal(SAVED_KEY, []) || []; }
 
-})();
-/* -------------------------------------------------------------
-   SOCIAL UI PRO — Perfiles, Guardado Dinámico, DarkMode, Fix UI
-   Compatible con backend (DB)
--------------------------------------------------------------- */
-
-/* ============================
-   1) Estado Global UI / Usuario
-=========================== */
-
-const appState = {
-    currentUser: null,   // usuario activo logeado
-    selectedProfile: null,
-    darkMode: localStorage.getItem("darkMode") === "true",
-};
-
-
-/* ============================
-   2) Obtener datos desde tu DB
-=========================== */
-
-async function fetchUserProfile(userId) {
-    try {
-        const res = await fetch(`${API_PUBLICACIONES}/nueva`);
-        if (!res.ok) throw new Error("Error al cargar perfil");
-
-        return await res.json();
-    } catch (err) {
-        console.error(err);
-        alert("No se pudo cargar el perfil del usuario.");
-        return null;
-    }
-}
-
-async function savePostToDB(postData) {
-    try {
-        const res = await fetch(`${API_PUBLICACIONES}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(postData),
-        });
-
-        if (!res.ok) throw new Error("Error guardando publicación");
-
-        return await res.json();
-    } catch (err) {
-        console.error(err);
-        alert("No se pudo guardar la publicación.");
-        return null;
-    }
-}
-
-
-/* ======================================
-   3) UI — Abrir perfil al clickear avatar
-====================================== */
-
-document.addEventListener("click", async (e) => {
-    const avatar = e.target.closest(".user-avatar");
-
-    if (!avatar) return;
-
-    const uid = avatar.dataset.userid;
-    if (!uid) return;
-
-    const profileData = await fetchUserProfile(uid);
-
-    if (profileData) {
-        appState.selectedProfile = profileData;
-        openProfileModal(profileData); // función UI
-    }
-});
-
-
-/* ======================================
-   4) UI — Mostrar Perfil en Modal
-====================================== */
-
-function openProfileModal(data) {
-    const modal = document.getElementById("profileModal");
-
-    modal.querySelector(".profile-name").textContent = data.nombre;
-    modal.querySelector(".profile-desc").textContent = data.descripcion;
-    modal.querySelector(".profile-posts").innerHTML = data.publicaciones
-        .map(p => `<div class="mini-post">${p.titulo}</div>`)
-        .join("");
-
-    modal.classList.add("active");
-}
-
-
-/* ======================================
-   5) Guardar publicación dinámica
-====================================== */
-
-document.getElementById("savePostBtn").addEventListener("click", async () => {
-    const title = document.getElementById("postTitle").value.trim();
-    const content = document.getElementById("postBody").value.trim();
-
-    if (!title || !content) {
-        return alert("Completa los campos antes de publicar.");
-    }
-
-    const newPost = {
-        usuario: appState.currentUser,
-        titulo: title,
-        contenido: content,
-        fecha: new Date().toISOString(),
-    };
-
-    const saved = await savePostToDB(newPost);
-
-    if (saved) {
-        appendPostToLeftPanel(saved);
-        cleanPostFields();
-    }
-});
-
-
-/* ======================================
-   6) Agregar publicación al lado izquierdo
-====================================== */
-
-function appendPostToLeftPanel(post) {
-    const list = document.getElementById("leftPostList");
-
-    const el = document.createElement("div");
-    el.className = "left-post-item fade-in";
-    el.innerHTML = `
-        <div class="post-title">${post.titulo}</div>
-        <div class="post-meta">${new Date(post.fecha).toLocaleString()}</div>
-    `;
-
-    list.prepend(el);
-}
-
-
-/* ======================================
-   7) Limpiar inputs después de publicar
-====================================== */
-
-function cleanPostFields() {
-    document.getElementById("postTitle").value = "";
-    document.getElementById("postBody").value = "";
-}
-
-
-/* ======================================
-   8) Dark mode funcional + persistencia
-====================================== */
-
-function applyDarkMode() {
-    document.body.classList.toggle("dark-theme", appState.darkMode);
-}
-
-document.getElementById("themeToggle").addEventListener("click", () => {
-    appState.darkMode = !appState.darkMode;
-    localStorage.setItem("darkMode", appState.darkMode);
-    applyDarkMode();
-});
-
-applyDarkMode();
-
-
-/* =====================================================
-   9) Fix UI — Prevent overflow del botón “Elegir archivos”
-===================================================== */
-
-function fixUploadButton() {
-    const uploadBtn = document.querySelector(".file-upload-label");
-
-    if (!uploadBtn) return;
-
-    uploadBtn.style.overflow = "hidden";
-    uploadBtn.style.textOverflow = "ellipsis";
-    uploadBtn.style.whiteSpace = "nowrap";
-    uploadBtn.style.maxWidth = "100%";
-}
-
-fixUploadButton();
-
-
-/* ======================================================
-   10) Inicializar usuario actual desde backend/session
-====================================================== */
-
-async function loadCurrentUser() {
-    try {
-        const res = await fetch(`${API_PUBLICACIONES}/nueva`);
-        if (!res.ok) return;
-
-        appState.currentUser = await res.json();
-    } catch (err) {
-        console.warn("No se cargó usuario activo");
-    }
-}
-loadCurrentUser();
+})(); 

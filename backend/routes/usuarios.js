@@ -1,124 +1,114 @@
 import express from "express";
-import bcrypt from "bcrypt";
 import Usuario from "../models/Usuario.js";
+import bcrypt from "bcryptjs";
 
 const router = express.Router();
 
-/* ===========================================================
-   🌐 Ping — despierta backend (Render boot)
-   GET /api/usuarios/ping
-=========================================================== */
-router.get("/ping", (req, res) => {
-  res.json({ ok: true, msg: "API usuarios activa 🟢" });
-});
-
-/* ===========================================================
-   ✅ Registrar usuario
-   POST /api/usuarios/registrar
-=========================================================== */
-router.post("/registrar", async (req, res) => {
+/* ==========================================
+   📌 REGISTRO — POST /api/usuarios/registro
+========================================== */
+router.post("/registro", async (req, res) => {
   try {
-    const { username, correo, password } = req.body;
+    const { nombre, email, password, avatar } = req.body;
 
-    if (!username || !correo || !password) {
-      return res.status(400).json({ msg: "Todos los campos son obligatorios" });
+    if (!nombre || !email || !password) {
+      return res.status(400).json({ error: "Faltan datos" });
     }
 
-    const usuarioExistente = await Usuario.findOne({
-      $or: [{ correo }, { username }]
-    });
-
-    if (usuarioExistente) {
-      return res.status(400).json({
-        msg: "Correo o usuario ya registrado"
-      });
+    const existe = await Usuario.findOne({ email });
+    if (existe) {
+      return res.status(400).json({ error: "El correo ya existe" });
     }
 
-    const hash = await bcrypt.hash(password, 10);
+    const passwordEncriptada = await bcrypt.hash(password, 10);
 
-    const nuevoUsuario = await Usuario.create({
-      username,
-      correo,
-      password: hash,
-      rol: "usuario",     // aseguramos rol por defecto
-      avatar: "",
-      bio: ""
+    const nuevo = new Usuario({
+      nombre,
+      email,
+      password: passwordEncriptada,
+      avatar: avatar || "https://i.imgur.com/2ZzK8K7.png"
     });
 
-    res.json({
-      msg: "Usuario registrado con éxito",
-      usuario: {
-        id: nuevoUsuario._id,
-        username: nuevoUsuario.username,
-        correo: nuevoUsuario.correo
-      }
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Error en el servidor" });
+    await nuevo.save();
+
+    res.json({ message: "Usuario registrado", usuario: nuevo });
+
+  } catch (err) {
+    res.status(500).json({ error: "Error al registrar usuario" });
   }
 });
 
-/* ===========================================================
-   ✅ Login de usuario
-   POST /api/usuarios/login
-=========================================================== */
+/* ==========================================
+   📌 LOGIN — POST /api/usuarios/login
+========================================== */
 router.post("/login", async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    const usuario = await Usuario.findOne({ username });
-    if (!usuario) {
-      return res.status(404).json({ msg: "Usuario no encontrado" });
-    }
+    const usuario = await Usuario.findOne({ email });
+    if (!usuario) return res.status(404).json({ error: "No existe el usuario" });
 
-    const match = await bcrypt.compare(password, usuario.password);
-    if (!match) {
-      return res.status(400).json({ msg: "Contraseña incorrecta" });
-    }
+    const coincide = await bcrypt.compare(password, usuario.password);
+    if (!coincide) return res.status(403).json({ error: "Contraseña incorrecta" });
 
     res.json({
-      msg: "Login correcto",
-      usuario: {
-        id: usuario._id,
-        username: usuario.username,
-        rol: usuario.rol,
-        avatar: usuario.avatar,
-        bio: usuario.bio
-      }
+      message: "Login correcto",
+      usuario
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Error en el servidor" });
+
+  } catch (err) {
+    res.status(500).json({ error: "Error en login" });
   }
 });
 
-/* ===========================================================
-   📌 Lista de usuarios (solo admin)
-   GET /api/usuarios/lista
-=========================================================== */
-router.get("/lista", async (req, res) => {
+/* ==========================================
+   📌 OBTENER PERFIL POR ID — GET /api/usuarios/:id
+========================================== */
+router.get("/:id", async (req, res) => {
   try {
-    const usuarios = await Usuario.find().select("-password");
-    res.json(usuarios);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Error al obtener usuarios" });
+    const usuario = await Usuario.findById(req.params.id).select("-password");
+
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    res.json(usuario);
+
+  } catch (err) {
+    res.status(500).json({ error: "Error al obtener usuario" });
   }
 });
 
-/* ===========================================================
-   ❌ Eliminar usuario (solo admin)
-   DELETE /api/usuarios/:id
-=========================================================== */
-router.delete("/:id", async (req, res) => {
+/* ==========================================
+   📌 EDITAR PERFIL — PUT /api/usuarios/:id
+========================================== */
+router.put("/:id", async (req, res) => {
   try {
-    await Usuario.findByIdAndDelete(req.params.id);
-    res.json({ msg: "Usuario eliminado" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Error eliminando usuario" });
+    const data = req.body;
+
+    // impedir que se cambie password directamente
+    delete data.password;
+
+    const actualizado = await Usuario.findByIdAndUpdate(req.params.id, data, {
+      new: true
+    }).select("-password");
+
+    if (!actualizado) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    res.json({ message: "Perfil actualizado", usuario: actualizado });
+
+  } catch (err) {
+    res.status(500).json({ error: "Error al actualizar perfil" });
   }
+});
+
+/* ==========================================
+   📌 DESPERTAR RENDER — GET /api/usuarios/ping
+========================================== */
+router.get("/ping", (req, res) => {
+  res.json({ ok: true, ts: Date.now() });
 });
 
 export default router;

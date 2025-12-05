@@ -1,15 +1,11 @@
 // ===========================================================
-// Importar configuración global de API
+// 🌐 Variables globales desde config.js
+// (API_BASE_URL, API_ADMIN, API_USUARIOS)
 // ===========================================================
-const API_ADMIN = `${API_BASE_URL}/api/admin`;
-const API_USUARIOS = `${API_BASE_URL}/api/usuarios`;
-  
 
 // ===========================================================
-// 🔵 SISTEMA DE TOAST (mensajes bonitos sin alterar diseño)
+// 🔵 SISTEMA DE TOAST
 // ===========================================================
-const API = "https://blogme2-1.onrender.com";
-
 function showToast(msg, type = "info") {
   let toast = document.getElementById("toast");
 
@@ -47,12 +43,7 @@ style.innerHTML = `
   transition: opacity .4s ease-in-out;
   z-index: 9999;
 }
-
-#toast.show {
-  visibility: visible;
-  opacity: 1;
-}
-
+#toast.show { visibility: visible; opacity: 1; }
 #toast.success { background: #28a745d9; }
 #toast.error { background: #dc3545d9; }
 #toast.warn { background: #ffc107d9; color: #222; }
@@ -61,15 +52,13 @@ document.head.appendChild(style);
 
 
 // ===========================================================
-// Cambiar entre login y registro 
+// 🔄 Cambiar entre login y registro 
 // ===========================================================
-
 const loginTab = document.getElementById("login-tab");
 const registerTab = document.getElementById("register-tab");
 const loginForm = document.getElementById("login-form");
 const registerForm = document.getElementById("register-form");
 
-// Tabs
 loginTab.addEventListener("click", () => {
   loginTab.classList.add("active");
   registerTab.classList.remove("active");
@@ -86,92 +75,74 @@ registerTab.addEventListener("click", () => {
 
 
 // ===========================================================
-// 🟦 VALIDACIONES PROFESIONALES
+// VALIDACIONES
 // ===========================================================
-
 function validarUsuario(usuario) {
   return /^[a-zA-Z0-9_]{3,20}$/.test(usuario);
 }
-
 function validarCorreo(correo) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
 }
-
 function validarPassword(pass) {
   return pass.length >= 6;
 }
 
 
 // ===========================================================
-// 🔐 LOGIN — Administradores y Usuarios
+// LOGIN — Admin + Usuario
 // ===========================================================
-
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const username = loginForm.querySelector('input[type="text"]').value.trim();
   const password = loginForm.querySelector('input[type="password"]').value.trim();
 
-  if (!username || !password) {
-    showToast("Completa todos los campos", "warn");
-    return;
-  }
-
-  if (!validarUsuario(username)) {
-    showToast("El usuario es inválido", "warn");
-    return;
-  }
+  if (!username || !password) return showToast("Completa todos los campos", "warn");
+  if (!validarUsuario(username)) return showToast("Usuario inválido", "warn");
 
   try {
-   const adminResp = await fetch(`${API_ADMIN}/login`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  credentials: "include",
-  body: JSON.stringify({ username, password }),
-});
+
+    // ADMIN LOGIN
+    const adminResp = await fetch(`${API_ADMIN}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ username, password }),
+    });
 
     if (adminResp.ok) {
       const data = await adminResp.json();
       localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
       localStorage.setItem("adminSession", "true");
-
       showToast(`Bienvenido administrador: ${data.admin.username}`, "success");
-      setTimeout(() => window.location.href = "admin.html", 4000);
-      return;
+      return setTimeout(() => (window.location.href = "admin.html"), 1200);
     }
 
-    // 2️⃣ Intentar login como usuario normal
+    // USUARIO LOGIN
     const userResp = await fetch(`${API_USUARIOS}/login`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ username, password })
-});
-
-
-
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
 
     const data = await userResp.json();
 
-    if (!userResp.ok) {
-      showToast(data.msg || "Credenciales incorrectas", "error");
-      return;
-    }
+    if (!userResp.ok) return showToast(data.msg || "Credenciales incorrectas", "error");
 
     localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
     showToast(`Bienvenido ${data.usuario.username}`, "success");
-    setTimeout(() => window.location.href = "publicaciones.html", 900);
+    setTimeout(() => (window.location.href = "publicaciones.html"), 900);
 
   } catch (err) {
-    console.error("Error:", err);
+    console.error(err);
     showToast("No se pudo conectar al servidor", "error");
   }
 });
 
 
 // ===========================================================
-// 🟩 REGISTRO — Usuarios reales (FUNCIONANDO AL 100%)
+// REGISTRO REAL
 // ===========================================================
-
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -179,48 +150,28 @@ registerForm.addEventListener("submit", async (e) => {
   const correo = document.getElementById("reg-correo").value.trim();
   const password = document.getElementById("reg-password").value.trim();
 
-  if (!username || !correo || !password) {
-    showToast("Completa todos los campos", "warn");
-    return;
-  }
-
-  if (!validarUsuario(username)) {
-    showToast("Usuario inválido (solo letras, números y _)", "warn");
-    return;
-  }
-
-  if (!validarCorreo(correo)) {
-    showToast("Correo no válido", "warn");
-    return;
-  }
-
-  if (!validarPassword(password)) {
-    showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
-    return;
-  }
+  if (!username || !correo || !password) return showToast("Completa todos los campos", "warn");
+  if (!validarUsuario(username)) return showToast("Usuario inválido", "warn");
+  if (!validarCorreo(correo)) return showToast("Correo inválido", "warn");
+  if (!validarPassword(password)) return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
 
   try {
-    const userResp = await fetch(`${API_USUARIOS}/login`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ username, password }),
-  credentials: "include"
-});
-
-
+    const resp = await fetch(`${API_USUARIOS}/registrar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ username, correo, password }),
+    });
 
     const data = await resp.json();
 
-    if (!resp.ok) {
-      showToast(data.msg || "Error en el registro", "error");
-      return;
-    }
+    if (!resp.ok) return showToast(data.msg || "Error en el registro", "error");
 
     showToast("Cuenta creada con éxito", "success");
     setTimeout(() => loginTab.click(), 600);
 
   } catch (error) {
-    console.error("Error:", error);
+    console.error(error);
     showToast("Error al conectar con el servidor", "error");
   }
 });

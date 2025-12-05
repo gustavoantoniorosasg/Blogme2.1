@@ -1,6 +1,5 @@
 // ===========================================================
 // 🌐 Variables globales desde config.js
-// (API_BASE_URL, API_ADMIN, API_USUARIOS)
 // ===========================================================
 
 // ===========================================================
@@ -77,9 +76,6 @@ registerTab.addEventListener("click", () => {
 // ===========================================================
 // VALIDACIONES
 // ===========================================================
-function validarUsuario(usuario) {
-  return /^[a-zA-Z0-9_]{3,20}$/.test(usuario);
-}
 function validarCorreo(correo) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
 }
@@ -94,27 +90,26 @@ function validarPassword(pass) {
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const username = loginForm.querySelector('input[type="text"]').value.trim();
+  const email = loginForm.querySelector('input[type="text"]').value.trim();
   const password = loginForm.querySelector('input[type="password"]').value.trim();
 
-  if (!username || !password) return showToast("Completa todos los campos", "warn");
-  if (!validarUsuario(username)) return showToast("Usuario inválido", "warn");
+  if (!email || !password) return showToast("Completa todos los campos", "warn");
+  if (!validarCorreo(email)) return showToast("Correo inválido", "warn");
 
   try {
-
     // ADMIN LOGIN
     const adminResp = await fetch(`${API_ADMIN}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ nombre: username, password }),
+      body: JSON.stringify({ email, password }),
     });
 
     if (adminResp.ok) {
       const data = await adminResp.json();
       localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
       localStorage.setItem("adminSession", "true");
-      showToast(`Bienvenido administrador: ${data.admin.username}`, "success");
+      showToast(`Bienvenido administrador`, "success");
       return setTimeout(() => (window.location.href = "admin.html"), 1200);
     }
 
@@ -122,15 +117,15 @@ loginForm.addEventListener("submit", async (e) => {
     const userResp = await fetch(`${API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre: username, password }),
+      body: JSON.stringify({ email, password }),
     });
 
     const data = await userResp.json();
 
-    if (!userResp.ok) return showToast(data.msg || "Credenciales incorrectas", "error");
+    if (!userResp.ok) return showToast(data.error || "Credenciales incorrectas", "error");
 
     localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
-    showToast(`Bienvenido ${data.usuario.username}`, "success");
+    showToast(`Bienvenido ${data.usuario.nombre}`, "success");
     setTimeout(() => (window.location.href = "publicaciones.html"), 900);
 
   } catch (err) {
@@ -146,13 +141,12 @@ loginForm.addEventListener("submit", async (e) => {
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const username = document.getElementById("reg-username").value.trim();
-  const correo = document.getElementById("reg-correo").value.trim();
+  const nombre = document.getElementById("reg-username").value.trim();
+  const email = document.getElementById("reg-correo").value.trim();
   const password = document.getElementById("reg-password").value.trim();
 
-  if (!username || !correo || !password) return showToast("Completa todos los campos", "warn");
-  if (!validarUsuario(username)) return showToast("Usuario inválido", "warn");
-  if (!validarCorreo(correo)) return showToast("Correo inválido", "warn");
+  if (!nombre || !email || !password) return showToast("Completa todos los campos", "warn");
+  if (!validarCorreo(email)) return showToast("Correo inválido", "warn");
   if (!validarPassword(password)) return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
 
   try {
@@ -160,7 +154,7 @@ registerForm.addEventListener("submit", async (e) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ username, correo, password }),
+      body: JSON.stringify({ nombre, email, password }),
     });
 
     const data = await resp.json();

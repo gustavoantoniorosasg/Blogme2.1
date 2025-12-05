@@ -150,7 +150,7 @@ registerForm.addEventListener("submit", async (e) => {
   if (!validarPassword(password)) return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
 
   try {
-    const resp = await fetch(`${API_USUARIOS}/registrar`, {
+    fetch(`${API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

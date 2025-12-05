@@ -1,12 +1,10 @@
 // ===========================================================
-// CONFIG
+// REGISTRO REAL DE USUARIO (usa config.js global)
 // ===========================================================
-const API_BASE_URL = "https://blogme2-1.onrender.com";
-const API_USUARIOS = `${API_BASE_URL}/api/usuarios`;
 
-// ===========================================================
-// REGISTRO REAL DE USUARIO
-// ===========================================================
+// Variables globales creadas por config.js
+// API_USUARIOS ya existe, no lo vuelvas a declarar
+
 const registerForm = document.getElementById("register-form");
 const registerMsg = document.getElementById("register-msg");
 const regUsername = document.getElementById("reg-username");
@@ -41,7 +39,7 @@ registerForm.addEventListener("submit", async (e) => {
     return mostrarMsg(registerMsg, "La contraseña debe tener al menos 6 caracteres");
 
   try {
-    const resp = await fetch(`${API_USUARIOS}/registrar`, {
+    fetch(`${API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre: username, email: correo, password }),

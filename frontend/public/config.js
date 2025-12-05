@@ -8,9 +8,12 @@ const IS_PRODUCTION =
   HOST.includes("vercel.app") || HOST.includes("onrender.com");
 
 // URL automática
-window.API_BASE_URL = IS_PRODUCTION
-  ? "https://blogme2-1.onrender.com"
-  : "http://localhost:3000";
+window.API_BASE_URL =
+  window.location.hostname.includes("localhost") ||
+  window.location.hostname.includes("127.0.0.1")
+    ? "http://localhost:3000"
+    : "https://blogme2-1.onrender.com";
+
 
 // Endpoints API globales
 window.API_ADMIN = `${API_BASE_URL}/api/admin`;

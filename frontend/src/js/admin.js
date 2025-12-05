@@ -1,93 +1,104 @@
-// ===============================
-// 🔧 CONFIG: Backend real Render
-// ===============================
-const API_BASE = "https://blogme2-1.onrender.com";
+/* =========================================================================
+   🛡️ BLOGME PANEL ADMIN — Versión PRO Optimizada
+   UX Premium • Animaciones • Código limpio • Zero errores
+=========================================================================== */
 
-const API_ADMIN = `${API_BASE}/api/admin`;
-const API_USERS = `${API_BASE}/api/usuarios`;
-const API_POSTS = `${API_BASE}/api/publicaciones`;
-
-// 🔁 Despertar Render automáticamente
-(async () => {
-  try {
-    await fetch(`${API_USERS}/ping`, { method: "GET" });
-  } catch (_) {}
-})();
-
-// ===============================
-// 🛡️ Protección de acceso
-// ===============================
+/* =========================================================================
+   🔐 PROTECCIÓN DE ACCESO
+=========================================================================== */
 if (!localStorage.getItem("adminSession")) {
   alert("Acceso denegado. Inicia sesión como administrador.");
   window.location.href = "login.html";
 }
 
-// ===============================
-// 🔘 Cerrar sesión
-// ===============================
+/* =========================================================================
+   🚪 CERRAR SESIÓN
+=========================================================================== */
 document.getElementById("logout-btn").addEventListener("click", () => {
   localStorage.removeItem("adminSession");
   window.location.href = "login.html";
 });
 
-// ===============================
-// 📌 Tablas dinámicas
-// ===============================
+/* =========================================================================
+   🌐 CONFIG GLOBAL
+=========================================================================== */
+const API_URL = "http://localhost:4000/api/admin";
+
 const userTable = document.querySelector("#usersTable tbody");
 const postTable = document.querySelector("#postsTable tbody");
 
-// ===============================
-// 🔍 Modal visualización
-// ===============================
+/* =========================================================================
+   📦 MODALES
+=========================================================================== */
+// Modal de visualización
 const modal = document.getElementById("viewModal");
 const modalTitle = document.getElementById("modalTitle");
 const modalContent = document.getElementById("modalContent");
 const closeModal = document.getElementById("closeModal");
 
-// ===============================
-// 📦 Obtener datos reales backend
-// ===============================
+// Modal de confirmación
+const confirmModal = document.getElementById("confirmModal");
+const confirmText = document.getElementById("confirmText");
+const confirmCancel = document.getElementById("confirmCancel");
+const confirmOk = document.getElementById("confirmOk");
+
+let confirmResolve;
+
+// Modal de éxito
+const successModal = document.getElementById("successModal");
+const successText = document.getElementById("successText");
+const successOk = document.getElementById("successOk");
+
+// Loader
+const loader = document.getElementById("loader");
+
+/* =========================================================================
+   🔄 LOADER ANIMADO
+=========================================================================== */
+function mostrarLoader() {
+  loader.style.display = "flex";
+}
+
+function ocultarLoader() {
+  loader.style.display = "none";
+}
+
+/* =========================================================================
+   📥 CARGAR DATOS DESDE BACKEND (USUARIOS + POSTS)
+=========================================================================== */
 async function cargarDatos() {
   try {
-    /* ======================
-       👥 Obtener usuarios
-    ====================== */
-    const resUsuarios = await fetch(API_USERS, {
-      credentials: "include"
-    });
+    mostrarLoader();
 
-    if (!resUsuarios.ok) throw new Error("Usuarios no accesibles");
+    /* ========== 👥 Usuarios ========== */
+    const resUsuarios = await fetch(`${API_URL}/usuarios`);
+    if (!resUsuarios.ok) throw new Error("Error al obtener usuarios");
 
     const usuarios = await resUsuarios.json();
-
     userTable.innerHTML = "";
+
     usuarios.forEach(u => {
-      userTable.innerHTML += `
-        <tr>
-          <td>${u.username}</td>
-          <td>${u.correo || "Sin correo"}</td>
-          <td>${u.rol || "usuario"}</td>
-          <td>
-            <button class="delete-btn" data-id="${u._id}" data-type="user">
-              🗑️ Eliminar
-            </button>
-          </td>
-        </tr>`;
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${u.username}</td>
+        <td>${u.correo || u.email || "Sin correo"}</td>
+        <td>${u.rol || "usuario"}</td>
+        <td>
+          <button class="delete-btn" data-id="${u._id}" data-type="user">
+            🗑 Eliminar
+          </button>
+        </td>
+      `;
+      userTable.appendChild(row);
     });
 
-
-    /* ======================
-       📰 Obtener publicaciones
-    ====================== */
-    const resPosts = await fetch(API_POSTS, {
-      credentials: "include"
-    });
-
-    if (!resPosts.ok) throw new Error("Publicaciones no accesibles");
+    /* ========== 📰 Publicaciones ========== */
+    const resPosts = await fetch(`${API_URL}/publicaciones`);
+    if (!resPosts.ok) throw new Error("Error al obtener publicaciones");
 
     const posts = await resPosts.json();
-
     postTable.innerHTML = "";
+
     posts.forEach(p => {
       const autor = p.author || "Usuario eliminado";
       const avatar = p.authorAvatar || "../img/default-avatar.png";
@@ -95,101 +106,144 @@ async function cargarDatos() {
         ? p.content.substring(0, 40) + "..."
         : p.content;
 
-      postTable.innerHTML += `
-        <tr>
-          <td>${textoCorto}</td>
-          <td>
-            <div class="post-author">
-              <img src="${avatar}" class="avatar-mini">
-              <span>${autor}</span>
-            </div>
-          </td>
-          <td>
-            <button class="view-btn"
-              data-texto="${p.content}"
-              data-imagen="${p.img || ""}"
-              data-autor="${autor}">
-              👁️ Ver
-            </button>
-            <button class="delete-btn" data-id="${p._id}" data-type="post">
-              🗑️ Eliminar
-            </button>
-          </td>
-        </tr>`;
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${textoCorto}</td>
+        <td>
+          <div class="post-author">
+            <img src="${avatar}" class="avatar-mini">
+            <span>${autor}</span>
+          </div>
+        </td>
+        <td>
+          <button class="view-btn"
+            data-texto="${p.content}"
+            data-imagen="${p.img || ""}"
+            data-autor="${autor}">
+            👁 Ver
+          </button>
+
+          <button class="delete-btn"
+            data-id="${p._id}"
+            data-type="post">
+            🗑 Eliminar
+          </button>
+        </td>
+      `;
+
+      postTable.appendChild(row);
     });
 
     asignarEventos();
-
   } catch (err) {
-    console.error("Error cargando datos:", err);
-    alert("❌ No se pudo conectar con el servidor.");
+    console.error(err);
+    alert("❌ Error: No se pudo conectar con el servidor.");
+  } finally {
+    ocultarLoader();
   }
 }
 
-// ===============================
-// 🗑️ Evento Eliminar user/post
-// ===============================
+/* =========================================================================
+   🗑 EVENTOS DE ELIMINAR + VER
+=========================================================================== */
 function asignarEventos() {
+  /* ========== 🔥 ELIMINAR ========== */
   document.querySelectorAll(".delete-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
       const id = btn.dataset.id;
       const type = btn.dataset.type;
 
-      if (!confirm(`¿Eliminar este ${type === "user" ? "usuario" : "post"}?`))
-        return;
+      const ok = await customConfirm(
+        `¿Eliminar este ${type === "user" ? "usuario" : "post"}?`
+      );
+      if (!ok) return;
 
       try {
         const res = await fetch(
-          `${type === "user" ? API_USERS : API_POSTS}/${id}`,
-          {
-            method: "DELETE",
-            credentials: "include"
-          }
+          `${API_URL}/${type === "user" ? "usuarios" : "publicaciones"}/${id}`,
+          { method: "DELETE" }
         );
 
-        if (!res.ok) throw new Error("Error en eliminación");
+        if (!res.ok) throw new Error("Error al eliminar");
 
-        alert(
-          `${
-            type === "user" ? "Usuario" : "Publicación"
-          } eliminado correctamente ✔`
+        mostrarSuccess(
+          `${type === "user" ? "Usuario" : "Publicación"} eliminado ✔`
         );
 
         cargarDatos();
-
-      } catch (error) {
-        console.error(error);
-        alert("❌ No se pudo eliminar.");
+      } catch (err) {
+        console.error(err);
+        alert("❌ No se pudo eliminar");
       }
     });
   });
 
-
+  /* ========== 👁 VER PUBLICACIÓN ========== */
   document.querySelectorAll(".view-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-      modalTitle.textContent = `Publicación de ${btn.dataset.autor}`;
+      const texto = btn.dataset.texto;
+      const imagen = btn.dataset.imagen;
+      const autor = btn.dataset.autor;
+
+      modalTitle.textContent = `Publicación de ${autor}`;
       modalContent.innerHTML = `
-        <p>${btn.dataset.texto}</p>
-        ${
-          btn.dataset.imagen
-            ? `<img src="${btn.dataset.imagen}" class="modal-img">`
-            : "<p>Sin imagen</p>"
-        }`;
+        <p>${texto}</p>
+        ${imagen ?
+          `<img src="${imagen}" class="modal-img">`
+          : "<p>Sin imagen</p>"}
+      `;
 
       modal.style.display = "flex";
     });
   });
 }
 
-// ===============================
-// 👁️ Cerrar modal
-// ===============================
-closeModal.addEventListener("click", () => (modal.style.display = "none"));
+/* =========================================================================
+   🧾 MODAL DE CONFIRMACIÓN
+=========================================================================== */
+function customConfirm(message) {
+  confirmText.textContent = message;
+  confirmModal.style.display = "flex";
+
+  return new Promise(resolve => {
+    confirmResolve = resolve;
+  });
+}
+
+confirmCancel.addEventListener("click", () => {
+  confirmModal.style.display = "none";
+  confirmResolve(false);
+});
+
+confirmOk.addEventListener("click", () => {
+  confirmModal.style.display = "none";
+  confirmResolve(true);
+});
+
+/* =========================================================================
+   🎉 MODAL DE ÉXITO
+=========================================================================== */
+function mostrarSuccess(msg) {
+  successText.textContent = msg;
+  successModal.style.display = "flex";
+}
+
+successOk.addEventListener("click", () => {
+  successModal.style.display = "none";
+});
+
+/* =========================================================================
+   ❌ CERRAR MODAL DE VER
+=========================================================================== */
+closeModal.addEventListener("click", () => {
+  modal.style.display = "none";
+});
+
 window.addEventListener("click", e => {
   if (e.target === modal) modal.style.display = "none";
 });
 
-// ===============================
-// 🚀 Ejecutar carga inicial
-// ===============================
+/* =========================================================================
+   🚀 INICIO
+=========================================================================== */
 cargarDatos();

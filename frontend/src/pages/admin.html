@@ -1,3 +1,5 @@
+admin.html
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -55,7 +57,7 @@
     </section>
   </main>
 
-  <!-- 👁️ Modal para ver publicación -->
+  <!-- 👁 Modal para ver publicación -->
   <div id="viewModal" class="modal">
     <div class="modal-content">
       <span id="closeModal" class="close">&times;</span>
@@ -64,7 +66,28 @@
     </div>
   </div>
 
-  <!-- ⚙️ Script principal -->
+<!-- 🗑 Modal de confirmación -->
+<div id="confirmModal" class="modal">
+  <div class="confirm-box">
+    <h3 id="confirmText">¿Seguro que quieres eliminar?</h3>
+    <div class="confirm-actions">
+      <button id="confirmCancel" class="cancel-btn">Cancelar</button>
+      <button id="confirmOk" class="ok-btn">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- 🎉 Modal de éxito -->
+<div id="successModal" class="modal">
+  <div class="success-box">
+    <h3 id="successText">Acción realizada correctamente</h3>
+    <button id="successOk" class="ok-btn">Aceptar</button>
+  </div>
+</div>
+
+
+
+  <!-- ⚙ Script principal -->
   <script src="../js/admin.js"></script>
 </body>
 </html>

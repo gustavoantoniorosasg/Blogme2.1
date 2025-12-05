@@ -1,3 +1,4 @@
+
 /* 🎨 ESTILO RENOVADO DEL PANEL ADMINISTRATIVO - BlogMe */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
@@ -216,4 +217,78 @@ button {
     grid-template-columns: 1fr;
     gap: 25px;
   }
+}
+
+
+/* 🗑 MODAL DE CONFIRMACIÓN */
+.confirm-box {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(15px);
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  color: #fff;
+  width: 350px;
+  animation: fadeIn 0.4s ease;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.45);
+}
+
+.confirm-actions {
+  margin-top: 25px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.cancel-btn {
+  background: linear-gradient(135deg, #90caf9, #42a5f5);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ok-btn {
+  background: linear-gradient(135deg, #ef5350, #c62828);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel-btn:hover,
+.ok-btn:hover {
+  opacity: 0.85;
+  transform: scale(1.05);
+}
+
+
+/* 🎉 Modal de éxito */
+.success-box {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(15px);
+  padding: 25px;
+  border-radius: 18px;
+  color: #fff;
+  width: 330px;
+  text-align: center;
+  animation: fadeIn 0.4s ease;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.45);
+}
+
+#successOk {
+  margin-top: 20px;
+  background: linear-gradient(135deg, #66bb6a, #388e3c);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#successOk:hover {
+  transform: scale(1.05);
+  opacity: .85;
 }

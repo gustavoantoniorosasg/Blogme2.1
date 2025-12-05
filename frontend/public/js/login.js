@@ -107,7 +107,7 @@ loginForm.addEventListener("submit", async (e) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ nombre: username, password }),
     });
 
     if (adminResp.ok) {
@@ -122,7 +122,7 @@ loginForm.addEventListener("submit", async (e) => {
     const userResp = await fetch(`${API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ nombre: username, password }),
     });
 
     const data = await userResp.json();

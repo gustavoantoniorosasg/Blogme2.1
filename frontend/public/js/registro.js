@@ -44,7 +44,7 @@ registerForm.addEventListener("submit", async (e) => {
     const resp = await fetch(`${API_USUARIOS}/registrar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, correo, password }),
+      body: JSON.stringify({ nombre: username, email: correo, password }),
     });
 
     const data = await resp.json();

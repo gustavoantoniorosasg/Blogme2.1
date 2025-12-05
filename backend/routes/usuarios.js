@@ -5,6 +5,13 @@ import bcrypt from "bcrypt";
 const router = express.Router();
 
 /* ==========================================
+   📌 DESPERTAR RENDER — GET /api/usuarios/ping
+========================================== */
+router.get("/ping", (req, res) => {
+  res.json({ ok: true, ts: Date.now() });
+});
+
+/* ==========================================
    📌 REGISTRO — POST /api/usuarios/registro
 ========================================== */
 router.post("/registro", async (req, res) => {
@@ -34,6 +41,7 @@ router.post("/registro", async (req, res) => {
     res.json({ message: "Usuario registrado", usuario: nuevo });
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Error al registrar usuario" });
   }
 });
@@ -57,6 +65,7 @@ router.post("/login", async (req, res) => {
     });
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Error en login" });
   }
 });
@@ -75,6 +84,7 @@ router.get("/:id", async (req, res) => {
     res.json(usuario);
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Error al obtener usuario" });
   }
 });
@@ -86,7 +96,6 @@ router.put("/:id", async (req, res) => {
   try {
     const data = req.body;
 
-    // impedir que se cambie password directamente
     delete data.password;
 
     const actualizado = await Usuario.findByIdAndUpdate(req.params.id, data, {
@@ -100,15 +109,9 @@ router.put("/:id", async (req, res) => {
     res.json({ message: "Perfil actualizado", usuario: actualizado });
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Error al actualizar perfil" });
   }
-});
-
-/* ==========================================
-   📌 DESPERTAR RENDER — GET /api/usuarios/ping
-========================================== */
-router.get("/ping", (req, res) => {
-  res.json({ ok: true, ts: Date.now() });
 });
 
 export default router;

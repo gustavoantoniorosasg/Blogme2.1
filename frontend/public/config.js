@@ -6,26 +6,26 @@
 // Detecta si estás en Render o local
 const IS_RENDER = window.location.hostname.includes("onrender.com");
 
-// URL BASE automática (pero puedes fijarla si quieres)
-window.API_BASE_URL = IS_RENDER
+// URL BASE automática
+window.API_BASE_URL = window.location.hostname.includes("vercel.app")
   ? "https://blogme2-1.onrender.com"
   : "http://localhost:3000";
 
-// Rutas para todos los módulos del frontend
-window.API_ADMIN = `${API_BASE_URL}/api/admin`;
-window.API_USUARIOS = `${API_BASE_URL}/api/usuarios`;
-window.API_PUBLICACIONES = `${API_BASE_URL}/api/publicaciones`;
+
+// Rutas API correctas
+window.API_ADMIN = `${window.API_BASE_URL}/api/admin`;
+window.API_USUARIOS = `${window.API_BASE_URL}/api/usuarios`;
+window.API_PUBLICACIONES = `${window.API_BASE_URL}/api/publicaciones`;
 
 // Para despertar backend en Render
 window.wakeBackend = async function () {
   try {
-    await fetch(`${API_USUARIOS}/ping`, { method: "GET" });
+    await fetch(`${window.API_BASE_URL}/api/ping`, { method: "GET" });
   } catch (e) {}
 };
 
 /* ===========================================================
-   🟦 Función global para obtener usuario actual
-   Evita duplicar código en varios archivos
+   🟦 Obtener usuario actual
 =========================================================== */
 window.getUser = function () {
   const raw = localStorage.getItem("usuarioActivo");
@@ -39,7 +39,7 @@ window.getUser = function () {
 };
 
 /* ===========================================================
-   🟥 Función global para cerrar sesión
+   🟥 Cerrar sesión
 =========================================================== */
 window.logout = function () {
   localStorage.removeItem("usuarioActivo");

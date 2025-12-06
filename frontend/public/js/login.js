@@ -91,11 +91,12 @@ loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   // ✔ ahora sí obtenemos el nombre
-  const nombre = document.getElementById("login-username")?.value?.trim();
-  const password = document.getElementById("login-password")?.value?.trim();
+const email = document.getElementById("login-correo").value.trim();
+const password = document.getElementById("login-password").value.trim();
+
 
   // 🔥 si algún input no existe o está vacío se evita romper
-  if (!nombre || !password)
+  if (!email || !password)
     return showToast("Completa todos los campos", "warn");
 
   if (!validarPassword(password))
@@ -122,7 +123,7 @@ loginForm.addEventListener("submit", async (e) => {
     const respUser = await fetch(`${API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre, password }),
+      body: JSON.stringify({ email, password }),
     });
 
     const data = await respUser.json();

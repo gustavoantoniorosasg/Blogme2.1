@@ -115,7 +115,7 @@ loginForm.addEventListener("submit", async (e) => {
     }
 
     // USUARIO LOGIN
-    const userResp = await fetch(`${API_USUARIOS}/registro`, {
+    const userResp = await fetch(`${API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),

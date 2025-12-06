@@ -1,9 +1,4 @@
-// ===========================================================
-// 🌐 IMPORTAR VARIABLES GLOBALES
-// ===========================================================
-
-
-console.log("🌍 API apuntando a:", API_ADMIN);
+console.log("🌍 API apuntando a:", API_USUARIOS);
 
 // ===========================================================
 // 🔔 TOAST SYSTEM
@@ -25,7 +20,7 @@ function showToast(msg, type = "info") {
   }, 2500);
 }
 
-// Toast Style
+// Toast visuals
 const toastStyle = document.createElement("style");
 toastStyle.innerHTML = `
 #toast {
@@ -85,17 +80,14 @@ function validarPassword(pass) {
 
 
 // ===========================================================
-// 🔐 LOGIN — Admin & Usuario
+// 🔐 LOGIN — Intento Admin → Luego Usuario normal
 // ===========================================================
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // ✔ ahora sí obtenemos el nombre
-const email = document.getElementById("login-correo").value.trim();
-const password = document.getElementById("login-password").value.trim();
+  const email = document.getElementById("login-correo").value.trim();
+  const password = document.getElementById("login-password").value.trim();
 
-
-  // 🔥 si algún input no existe o está vacío se evita romper
   if (!email || !password)
     return showToast("Completa todos los campos", "warn");
 
@@ -103,7 +95,7 @@ const password = document.getElementById("login-password").value.trim();
     return showToast("Contraseña inválida", "warn");
 
   try {
-    // 1️⃣ LOGIN ADMIN
+    // 1️⃣ Intentar Login como ADMIN
     const adminResp = await fetch(`${API_ADMIN}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -116,13 +108,15 @@ const password = document.getElementById("login-password").value.trim();
       localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
       localStorage.setItem("adminSession", "true");
       showToast(`Bienvenido administrador`, "success");
-      return setTimeout(() => (window.location.href = "/admin.html"), 800);
+
+      return setTimeout(() => (window.location.href = "/admin-panel.html"), 800);
     }
 
-    // 2️⃣ LOGIN Usuario Normal
-    const respUser = await fetch(`${API_USUARIOS}/registro`, {
+    // 2️⃣ Intentar login como usuario normal
+    const respUser = await fetch(`${API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ email, password }),
     });
 
@@ -164,15 +158,15 @@ registerForm.addEventListener("submit", async (e) => {
     const resp = await fetch(`${API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ nombre, email, password }),
     });
 
     let data = {};
     try { data = await resp.json(); } catch {}
 
-    if (!resp.ok) {
+    if (!resp.ok)
       return showToast(data.msg || data.error || "Error al registrarse", "error");
-    }
 
     showToast("Cuenta creada con éxito 🎉", "success");
     setTimeout(() => loginTab.click(), 600);

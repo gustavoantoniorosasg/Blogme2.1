@@ -87,10 +87,11 @@ function validarPassword(pass) {
 // ===========================================================
 // LOGIN — Admin + Usuario
 // ===========================================================
+// LOGIN — Admin + Usuario
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const email = loginForm.querySelector('input[type="text"]').value.trim();
+  const email = document.getElementById("login-correo").value.trim();
   const password = loginForm.querySelector('input[type="password"]').value.trim();
 
   if (!email || !password) return showToast("Completa todos los campos", "warn");
@@ -122,7 +123,8 @@ loginForm.addEventListener("submit", async (e) => {
 
     const data = await userResp.json();
 
-    if (!userResp.ok) return showToast(data.error || "Credenciales incorrectas", "error");
+    if (!userResp.ok)
+      return showToast(data.error || "Credenciales incorrectas", "error");
 
     localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
     showToast(`Bienvenido ${data.usuario.nombre}`, "success");
@@ -135,6 +137,10 @@ loginForm.addEventListener("submit", async (e) => {
 });
 
 
+
+// ===========================================================
+// REGISTRO REAL
+// ===========================================================
 // ===========================================================
 // REGISTRO REAL
 // ===========================================================
@@ -150,7 +156,7 @@ registerForm.addEventListener("submit", async (e) => {
   if (!validarPassword(password)) return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
 
   try {
-    fetch(`${API_USUARIOS}/registro`, {
+    const resp = await fetch(`${API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

@@ -120,7 +120,7 @@ const password = document.getElementById("login-password").value.trim();
     }
 
     // 2️⃣ LOGIN Usuario Normal
-    const respUser = await fetch(`${API_USUARIOS}/login`, {
+    const respUser = await fetch(`${API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),

@@ -141,9 +141,6 @@ loginForm.addEventListener("submit", async (e) => {
 // ===========================================================
 // REGISTRO REAL
 // ===========================================================
-// ===========================================================
-// REGISTRO REAL
-// ===========================================================
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -159,13 +156,19 @@ registerForm.addEventListener("submit", async (e) => {
     const resp = await fetch(`${API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ nombre, email, password }),
+      body: JSON.stringify({ nombre, email, password })
     });
 
-    const data = await resp.json();
+    let data = {};
 
-    if (!resp.ok) return showToast(data.msg || "Error en el registro", "error");
+    try { data = await resp.json(); } catch {}
+
+    if (!resp.ok) {
+      return showToast(
+        data.msg || data.error || "Error en el registro",
+        "error"
+      );
+    }
 
     showToast("Cuenta creada con éxito", "success");
     setTimeout(() => loginTab.click(), 600);

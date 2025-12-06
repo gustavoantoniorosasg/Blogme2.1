@@ -85,25 +85,23 @@ function validarPassword(pass) {
 
 
 // ===========================================================
-// LOGIN — Admin + Usuario
+// LOGIN — Admin + Usuario (por NOMBRE)
 // ===========================================================
-// LOGIN — Admin + Usuario
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const email = document.getElementById("login-correo").value.trim();
+  const nombre = document.getElementById("login-username").value.trim();
   const password = loginForm.querySelector('input[type="password"]').value.trim();
 
-  if (!email || !password) return showToast("Completa todos los campos", "warn");
-  if (!validarCorreo(email)) return showToast("Correo inválido", "warn");
+  if (!nombre || !password) return showToast("Completa todos los campos", "warn");
 
   try {
     // ADMIN LOGIN
-    const resp = await fetch(`${API_USUARIOS}/registro`, {
+    const adminResp = await fetch(`${API_ADMIN}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ nombre, password }),
     });
 
     if (adminResp.ok) {
@@ -114,11 +112,11 @@ loginForm.addEventListener("submit", async (e) => {
       return setTimeout(() => (window.location.href = "admin.html"), 1200);
     }
 
-    // USUARIO LOGIN
-    const userResp = await fetch(`${API_USUARIOS}/registro`, {
+    // LOGIN USUARIO NORMAL
+    const userResp = await fetch(`${API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ nombre, password }),
     });
 
     const data = await userResp.json();
@@ -137,7 +135,6 @@ loginForm.addEventListener("submit", async (e) => {
 });
 
 
-
 // ===========================================================
 // REGISTRO REAL
 // ===========================================================
@@ -153,18 +150,23 @@ registerForm.addEventListener("submit", async (e) => {
   if (!validarPassword(password)) return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
 
   try {
-    fetch(`${API_USUARIOS}/registro`, {
+    const resp = await fetch(`${API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ nombre, email, password }),
+      body: JSON.stringify({ nombre, email, password })
     });
 
-    const data = await resp.json();
+    let data = {};
+    try { data = await resp.json(); } catch {}
 
-    if (!resp.ok) return showToast(data.msg || "Error en el registro", "error");
+    if (!resp.ok) {
+      return showToast(
+        data.msg || data.error || "Error en el registro",
+        "error"
+      );
+    }
 
-    showToast("Cuenta creada con éxito", "success");
+    showToast("Cuenta creada con éxito 🎉", "success");
     setTimeout(() => loginTab.click(), 600);
 
   } catch (error) {

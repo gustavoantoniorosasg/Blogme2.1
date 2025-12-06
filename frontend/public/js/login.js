@@ -2,8 +2,9 @@
 // 🌐 Variables globales desde config.js
 // ===========================================================
 
+
 // ===========================================================
-// 🔵 SISTEMA DE TOAST
+// 🔵 SISTEMA DE TOAST NOTIFICACIONES
 // ===========================================================
 function showToast(msg, type = "info") {
   let toast = document.getElementById("toast");
@@ -22,7 +23,7 @@ function showToast(msg, type = "info") {
   }, 2800);
 }
 
-// Toast estilos
+// Toast estilos dinámicos
 const style = document.createElement("style");
 style.innerHTML = `
 #toast {
@@ -82,23 +83,40 @@ function validarCorreo(correo) {
 function validarPassword(pass) {
   return pass.length >= 6;
 }
+function validarNombre(nombre) {
+  return nombre.length >= 3;
+}
 
 
 // ===========================================================
-// LOGIN — Admin + Usuario
+// Loader para evitar doble clic
 // ===========================================================
-// LOGIN — Admin + Usuario
+function toggleFormLoading(form, state) {
+  const button = form.querySelector("button[type='submit']");
+  button.disabled = state;
+  button.innerText = state ? "Procesando..." : "Entrar / Registrarse";
+}
+
+
+// ===========================================================
+// LOGIN — Ahora pide NOMBRE y contraseña
+// ===========================================================
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const nombre = document.getElementById("login-username").value.trim();
   const password = loginForm.querySelector('input[type="password"]').value.trim();
 
-  if (!email || !password) return showToast("Completa todos los campos", "warn");
-  if (!validarCorreo(email)) return showToast("Correo inválido", "warn");
+  if (!nombre || !password) 
+    return showToast("Completa todos los campos", "warn");
+
+  if (!validarNombre(nombre))
+    return showToast("El nombre mínimo debe tener 3 caracteres", "warn");
+
+  toggleFormLoading(loginForm, true);
 
   try {
-    // ADMIN LOGIN
+    // 🔹 ADMIN LOGIN POR NOMBRE
     const adminResp = await fetch(`${API_ADMIN}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -111,14 +129,17 @@ loginForm.addEventListener("submit", async (e) => {
       localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
       localStorage.setItem("adminSession", "true");
       showToast(`Bienvenido administrador`, "success");
-      return setTimeout(() => (window.location.href = "admin.html"), 1200);
+
+      return setTimeout(() => {
+        window.location.href = "admin.html";
+      }, 1200);
     }
 
-    // USUARIO LOGIN
+    // 🔹 USUARIO LOGIN NORMAL
     const userResp = await fetch(`${API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ nombre, password }),
     });
 
     const data = await userResp.json();
@@ -127,19 +148,23 @@ loginForm.addEventListener("submit", async (e) => {
       return showToast(data.error || "Credenciales incorrectas", "error");
 
     localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
+
     showToast(`Bienvenido ${data.usuario.nombre}`, "success");
+
     setTimeout(() => (window.location.href = "publicaciones.html"), 900);
 
   } catch (err) {
     console.error(err);
     showToast("No se pudo conectar al servidor", "error");
   }
+
+  toggleFormLoading(loginForm, false);
 });
 
 
 
 // ===========================================================
-// REGISTRO REAL
+// REGISTRO REAL de usuarios
 // ===========================================================
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -148,19 +173,28 @@ registerForm.addEventListener("submit", async (e) => {
   const email = document.getElementById("reg-correo").value.trim();
   const password = document.getElementById("reg-password").value.trim();
 
-  if (!nombre || !email || !password) return showToast("Completa todos los campos", "warn");
-  if (!validarCorreo(email)) return showToast("Correo inválido", "warn");
-  if (!validarPassword(password)) return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
+  if (!nombre || !email || !password)
+    return showToast("Completa todos los campos", "warn");
+
+  if (!validarNombre(nombre))
+    return showToast("El nombre debe tener mínimo 3 caracteres", "warn");
+
+  if (!validarCorreo(email))
+    return showToast("Correo inválido", "warn");
+
+  if (!validarPassword(password))
+    return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
+
+  toggleFormLoading(registerForm, true);
 
   try {
-    const resp = await fetch(`${API_USUARIOS}/registro`, {   // 🔥 CORREGIDO
+    const resp = await fetch(`${API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre, email, password })
     });
 
     let data = {};
-
     try { data = await resp.json(); } catch {}
 
     if (!resp.ok) {
@@ -177,4 +211,6 @@ registerForm.addEventListener("submit", async (e) => {
     console.error(error);
     showToast("Error al conectar con el servidor", "error");
   }
+
+  toggleFormLoading(registerForm, false);
 });

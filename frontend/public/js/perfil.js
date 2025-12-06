@@ -1,94 +1,78 @@
-// perfil.js - versión robusta y corregida
+// perfil.js — sincronización con API + fallback localStorage (versión extendida)
+// Requisitos: config.js debe definir window.API_USUARIOS
 (() => {
   const $ = sel => document.querySelector(sel);
   const LS = window.localStorage;
 
-  // Utilities
-  const genId = () => 'id_' + Math.random().toString(36).slice(2, 10);
+  /* ----------------------
+     Utilities
+  ---------------------- */
+  const genId = () => "id_" + Math.random().toString(36).slice(2, 10);
+  const escapeHtml = s => (s + "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
   const timeAgo = ts => {
     const s = Math.floor((Date.now() - ts) / 1000);
-    if (s < 60) return `${s}s`; if (s < 3600) return `${Math.floor(s / 60)}m`;
-    if (s < 86400) return `${Math.floor(s / 3600)}h`; return `${Math.floor(s / 86400)}d`;
+    if (s < 60) return `${s}s`;
+    if (s < 3600) return `${Math.floor(s / 60)}m`;
+    if (s < 86400) return `${Math.floor(s / 3600)}h`;
+    return `${Math.floor(s / 86400)}d`;
   };
-  const escapeHtml = s => (s + "").replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 
-  // Toast
+  /* ----------------------
+     Toast helper
+  ---------------------- */
   const toastEl = $("#toast");
   function toast(msg, t = 1800) {
-    if (!toastEl) return;
+    if (!toastEl) return console.warn("Toast element not found:", msg);
     toastEl.textContent = msg;
+    toastEl.classList.remove("toast-show");
+    void toastEl.offsetWidth;
     toastEl.classList.add("toast-show");
     setTimeout(() => toastEl.classList.remove("toast-show"), t);
   }
 
-  // Confirm modal (insertado dinámicamente)
-  let postToDelete = null;
-  const confirmModal = document.createElement("div");
-  confirmModal.id = "confirmModal";
-  confirmModal.style.cssText = `
-    position: fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-    background: #fff; padding: 20px 28px; border-radius:14px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25); z-index:9999; display:none;
-    text-align:center; max-width:320px;
-  `;
-  confirmModal.innerHTML = `
-    <p style="margin-bottom:15px;">¿Deseas eliminar la publicación?</p>
-    <div style="display:flex; gap:10px; justify-content:center;">
-      <button id="confirmYes" style="padding:8px 14px;border-radius:8px;background:#3a7bfc;color:#fff;border:none;cursor:pointer;">Sí</button>
-      <button id="confirmNo" style="padding:8px 14px;border-radius:8px;background:#ccc;color:#222;border:none;cursor:pointer;">Cancelar</button>
-    </div>
-  `;
-  document.body.appendChild(confirmModal);
-  const confirmYesBtn = confirmModal.querySelector("#confirmYes");
-  const confirmNoBtn = confirmModal.querySelector("#confirmNo");
-  confirmNoBtn.onclick = () => { postToDelete = null; confirmModal.style.display = "none"; };
-  confirmYesBtn.onclick = () => {
-    if (postToDelete) {
-      const postsArr = JSON.parse(LS.getItem("blogme_posts") || "[]");
-      LS.removeItem(`blogme_comments_${postToDelete}`);
-      LS.setItem("blogme_posts", JSON.stringify(postsArr.filter(x => x.id !== postToDelete)));
-      renderProfilePosts();
-      toast("Publicación eliminada", 2000);
-      postToDelete = null;
-      confirmModal.style.display = "none";
-    }
-  };
-
-  // ---------------------------
-  // Obtener nombre de usuario activo correctamente (parsea si es JSON)
-  // ---------------------------
+  /* ----------------------
+     Active user detection (robusto)
+     - lee localStorage 'usuarioActivo'
+     - extrae id si existe (_id | id)
+  ---------------------- */
   const rawActive = LS.getItem("usuarioActivo");
+  let activeId = null;
   let activeName = "Invitado";
+  let activeEmail = null;
+
   if (rawActive) {
     try {
       const parsed = JSON.parse(rawActive);
-      // busca campos típicos
-      activeName = parsed.nombre || parsed.name || parsed.username || String(parsed) || "Invitado";
+      // campos comunes
+      activeId = parsed._id || parsed.id || null;
+      activeName = parsed.nombre || parsed.name || parsed.username || parsed.nombreUsuario || activeName;
+      activeEmail = parsed.email || parsed.correo || null;
     } catch {
-      // si no es JSON, usar el string tal cual
-      activeName = rawActive || "Invitado";
+      // si no es JSON, guardar como string
+      activeName = rawActive;
     }
   }
 
   const profileKey = `blogme_profile_${activeName}`;
 
-  // Crear perfil por defecto si no existe
+  /* ----------------------
+     Asegurar perfil en localStorage (fallback)
+  ---------------------- */
   if (!LS.getItem(profileKey)) {
-    const def = {
+    LS.setItem(profileKey, JSON.stringify({
       name: activeName,
-      // ruta pública (raíz) que funciona desde cualquier página
       avatar: "/images/decoraciones/avatar-placeholder.png",
       bio: "Hola! Soy nuevo en BlogMe.",
       notes: [{ id: genId(), text: "¡Mi primera nota!", ts: Date.now() }]
-    };
-    LS.setItem(profileKey, JSON.stringify(def));
+    }));
   }
 
-  const getUser = () => JSON.parse(LS.getItem(profileKey) || "{}");
+  const getLocalProfile = () => JSON.parse(LS.getItem(profileKey) || "{}");
+  const setLocalProfile = (p) => LS.setItem(profileKey, JSON.stringify(p));
 
-  // ---------------------------
-  // DOM (puede devolver null si algo falta; por eso comprobamos antes de usar)
-  // ---------------------------
+  /* ----------------------
+     DOM (selectores; tolerantes a null)
+  ---------------------- */
   const topAvatar = $("#topAvatar");
   const topName = $("#topName");
   const topNotesCount = $("#topNotesCount");
@@ -109,26 +93,88 @@
   const closeProfile = $("#closeProfile");
   const cancelProfile = $("#cancelProfile");
 
-  const profileNameInput = $("#profileNameInput");
-  const profileBioInput = $("#profileBioInput");
-
   const avatarUpload = $("#avatarUpload");
   const btnUpload = document.querySelector(".btn-upload");
 
+  const profileNameInput = $("#profileNameInput");
+  const profileBioInput = $("#profileBioInput");
   const saveProfile = $("#saveProfile");
   const addNoteBtnProfile = $("#addNoteBtnProfile");
 
-  // ---------------------------
-  // loadProfileInfo seguro (comprueba null antes de asignar)
-  // ---------------------------
-  function loadProfileInfo() {
-    const prof = getUser();
+  /* ----------------------
+     API helpers
+     - intenta GET /api/usuarios/:id
+     - intenta PUT /api/usuarios/:id
+     - si no hay id o la API falla, usa localStorage
+  ---------------------- */
+  const API_BASE = window.API_USUARIOS || null; // debe venir de config.js
+
+  async function fetchProfileFromAPI() {
+    if (!API_BASE || !activeId) return null;
+    try {
+      const resp = await fetch(`${API_BASE}/${activeId}`, { method: "GET", headers: { "Content-Type": "application/json" } });
+      if (!resp.ok) {
+        // no disponible o no encontrado -> retorna null para usar local
+        console.warn("API profile GET failed", resp.status);
+        return null;
+      }
+      const json = await resp.json();
+      // el backend devuelve el perfil sin password (según tus rutas)
+      // convertir campos a la estructura local que usamos:
+      const profile = {
+        name: json.nombre || json.name || json.username || activeName,
+        avatar: json.avatar || "/images/decoraciones/avatar-placeholder.png",
+        bio: json.descripcion || json.bio || "",
+        notes: json.notes || getLocalProfile().notes || []
+      };
+      // guardar localmente (sin borrar notas si ya existían)
+      setLocalProfile(Object.assign(getLocalProfile(), profile));
+      return profile;
+    } catch (err) {
+      console.warn("fetchProfileFromAPI error:", err);
+      return null;
+    }
+  }
+
+  async function saveProfileToAPI(profile) {
+    if (!API_BASE || !activeId) return { ok: false, reason: "no-id-or-api" };
+    try {
+      // Aquí enviamos un PUT. El backend de ejemplo espera PUT /api/usuarios/:id
+      // Enviar JSON con los campos editables: nombre, avatar, descripcion
+      const body = {
+        nombre: profile.name,
+        avatar: profile.avatar,
+        descripcion: profile.bio
+      };
+      const resp = await fetch(`${API_BASE}/${activeId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      if (!resp.ok) {
+        const t = await resp.text().catch(()=>null);
+        console.warn("saveProfileToAPI failed", resp.status, t);
+        return { ok: false, status: resp.status, text: t };
+      }
+      const json = await resp.json().catch(()=>null);
+      return { ok: true, data: json };
+    } catch (err) {
+      console.warn("saveProfileToAPI err", err);
+      return { ok: false, reason: err.message };
+    }
+  }
+
+  /* ----------------------
+     UI rendering (seguro)
+  ---------------------- */
+  function loadProfileInfo(profileOverride = null) {
+    const prof = profileOverride || getLocalProfile();
 
     if (profileName) profileName.textContent = prof.name || "Invitado";
     if (profileBio) profileBio.textContent = prof.bio || "Sin bio — ¡edítala!";
     if (profileAvatar) profileAvatar.src = prof.avatar || "/images/decoraciones/avatar-placeholder.png";
 
-    if (topAvatar) topAvatar.src = (prof.avatar || "/images/decoraciones/avatar-placeholder.png");
+    if (topAvatar) topAvatar.src = prof.avatar || "/images/decoraciones/avatar-placeholder.png";
     if (topName) topName.textContent = prof.name || "Invitado";
     if (topNotesCount) topNotesCount.textContent = `${(prof.notes || []).length} notas`;
     if (notesCountEl) notesCountEl.textContent = (prof.notes || []).length;
@@ -136,9 +182,6 @@
     renderNotes(prof.notes || []);
   }
 
-  // ---------------------------
-  // renderNotes (seguro)
-  // ---------------------------
   function renderNotes(notes) {
     if (!profileNotesList) return;
     profileNotesList.innerHTML = "";
@@ -153,57 +196,59 @@
         </div>`;
       profileNotesList.appendChild(div);
 
-      const noteTextEl = div.querySelector(".note-text");
       const editBtn = div.querySelector(".edit-note");
       const delBtn = div.querySelector(".del-note");
+      const textEl = div.querySelector(".note-text");
 
       if (editBtn) {
         editBtn.onclick = () => {
-          if (editBtn.textContent === "Editar") {
-            noteTextEl.contentEditable = "true";
-            noteTextEl.classList.add("editing-note");
-            noteTextEl.focus();
-            editBtn.textContent = "Guardar";
-          } else {
-            noteTextEl.contentEditable = "false";
-            noteTextEl.classList.remove("editing-note");
-            const prof = getUser();
-            const idx = (prof.notes || []).findIndex(x => x.id === n.id);
+          if (textEl.isContentEditable) {
+            // guardar
+            textEl.contentEditable = false;
+            const local = getLocalProfile();
+            const idx = (local.notes || []).findIndex(x => x.id === n.id);
             if (idx !== -1) {
-              prof.notes[idx].text = noteTextEl.textContent.trim();
-              prof.notes[idx].ts = Date.now();
-              LS.setItem(profileKey, JSON.stringify(prof));
+              local.notes[idx].text = textEl.textContent.trim();
+              local.notes[idx].ts = Date.now();
+              setLocalProfile(local);
+              // opcional: aquí podríamos enviar notas a API si la soportas
+              toast("Nota guardada");
               loadProfileInfo();
-              toast("Nota actualizada");
             }
             editBtn.textContent = "Editar";
+          } else {
+            textEl.contentEditable = true;
+            textEl.focus();
+            editBtn.textContent = "Guardar";
           }
         };
       }
 
       if (delBtn) {
         delBtn.onclick = () => {
-          const prof = getUser();
-          prof.notes = (prof.notes || []).filter(x => x.id !== n.id);
-          LS.setItem(profileKey, JSON.stringify(prof));
+          const local = getLocalProfile();
+          local.notes = (local.notes || []).filter(x => x.id !== n.id);
+          setLocalProfile(local);
           loadProfileInfo();
-          toast("Nota eliminada", 1600);
+          toast("Nota eliminada");
         };
       }
     });
   }
 
-  // ---------------------------
-  // renderProfilePosts (seguro)
-  // ---------------------------
+  /* ----------------------
+     Publicaciones del perfil (trae desde localStorage y, opcional, desde API si quieres)
+     - Aquí solo mostramos lo que hay en localStorage (porque tu backend publica posts en otra ruta)
+     - Si quieres que también traiga posts desde API podemos integrarlo.
+  ---------------------- */
   function renderProfilePosts() {
     if (!profilePosts) return;
     const posts = JSON.parse(LS.getItem("blogme_posts") || "[]");
-    const prof = getUser();
+    const prof = getLocalProfile();
     const mine = posts.filter(p => p.author === (prof.name || activeName));
     profilePosts.innerHTML = "";
     if (postsCountEl) postsCountEl.textContent = mine.length;
-    if (mine.length === 0) {
+    if (!mine.length) {
       profilePosts.innerHTML = `<div style="color:#6b7280">Aún no has publicado nada.</div>`;
       return;
     }
@@ -219,58 +264,15 @@
         <div class="post-content" contenteditable="false" style="margin-top:8px;">
           <p>${escapeHtml(p.content)}</p>
           ${p.img ? `<div class="post-media"><img src="${p.img}" alt="img"></div>` : ""}
-        </div>
-        <div style="margin-top:10px;display:flex;gap:6px;justify-content:flex-end;">
-          <button class="btn-comment" data-id="${p.id}">Comentar</button>
-          <button class="btn-edit-post" data-id="${p.id}">Editar</button>
-          <button class="btn-del-post" data-id="${p.id}">Eliminar</button>
         </div>`;
       profilePosts.appendChild(card);
-
-      const commentBtn = card.querySelector(".btn-comment");
-      if (commentBtn) commentBtn.onclick = ev => {
-        const id = ev.currentTarget.dataset.id;
-        if (typeof window.openComments === "function") window.openComments(id);
-        else toast("Función de comentarios no disponible");
-      };
-
-      const editBtn = card.querySelector(".btn-edit-post");
-      if (editBtn) editBtn.onclick = () => {
-        const contentEl = card.querySelector(".post-content");
-        if (editBtn.textContent === "Editar") {
-          contentEl.contentEditable = "true";
-          contentEl.style.border = "1px solid var(--primary)";
-          contentEl.style.background = "#FDF2F8";
-          contentEl.focus();
-          editBtn.textContent = "Guardar";
-        } else {
-          contentEl.contentEditable = "false";
-          contentEl.style.border = "none";
-          contentEl.style.background = "transparent";
-          const postsArr = JSON.parse(LS.getItem("blogme_posts") || "[]");
-          const idx = postsArr.findIndex(x => x.id === p.id);
-          if (idx !== -1) {
-            postsArr[idx].content = contentEl.innerText.trim();
-            LS.setItem("blogme_posts", JSON.stringify(postsArr));
-            renderProfilePosts();
-            toast("Publicación actualizada");
-          }
-          editBtn.textContent = "Editar";
-        }
-      };
-
-      const delBtn = card.querySelector(".btn-del-post");
-      if (delBtn) delBtn.onclick = ev => {
-        postToDelete = ev.currentTarget.dataset.id;
-        confirmModal.style.display = "block";
-      };
     });
   }
 
-  // ---------------------------
-  // Handlers modal perfil (seguro)
-  // ---------------------------
-  const cerrarModal = () => {
+  /* ----------------------
+     Handlers: modal edición perfil
+  ---------------------- */
+  const hideProfileModal = () => {
     if (profileModal) {
       profileModal.classList.add("hidden");
       profileModal.classList.remove("show");
@@ -279,7 +281,7 @@
 
   if (editProfileBtn) {
     editProfileBtn.onclick = () => {
-      const prof = getUser();
+      const prof = getLocalProfile();
       if (profileNameInput) profileNameInput.value = prof.name || "";
       if (profileBioInput) profileBioInput.value = prof.bio || "";
       if (profileModal) {
@@ -289,26 +291,63 @@
     };
   }
 
-  if (closeProfile) closeProfile.onclick = cerrarModal;
-  if (cancelProfile) cancelProfile.onclick = cerrarModal;
+  if (closeProfile) closeProfile.onclick = hideProfileModal;
+  if (cancelProfile) cancelProfile.onclick = hideProfileModal;
 
   if (saveProfile) {
-    saveProfile.onclick = () => {
-      const prof = getUser();
-      if (profileNameInput) prof.name = profileNameInput.value.trim() || prof.name;
-      if (profileBioInput) prof.bio = profileBioInput.value.trim() || prof.bio;
-      LS.setItem(profileKey, JSON.stringify(prof));
-      cerrarModal();
+    saveProfile.onclick = async () => {
+      const prof = getLocalProfile();
+      const newName = (profileNameInput?.value || "").trim();
+      const newBio = (profileBioInput?.value || "").trim();
+
+      if (newName) prof.name = newName;
+      prof.bio = newBio || prof.bio;
+
+      // Guardamos localmente primero (optimista)
+      setLocalProfile(prof);
       loadProfileInfo();
       renderProfilePosts();
-      toast("Perfil actualizado", 1600);
+      toast("Guardando perfil...");
+
+      // Intentamos guardar en API si tenemos id
+      if (activeId && API_BASE) {
+        const res = await saveProfileToAPI({
+          name: prof.name,
+          avatar: prof.avatar,
+          bio: prof.bio
+        });
+        if (res.ok) {
+          toast("Perfil sincronizado con servidor");
+          // si API devolvió algo, actualizar local con respuesta
+          if (res.data && res.data.usuario) {
+            // si tu backend responde con usuario actualizado, puedes mapearlo.
+            const remote = res.data.usuario;
+            const merged = Object.assign(prof, {
+              name: remote.nombre || remote.name || prof.name,
+              avatar: remote.avatar || prof.avatar,
+              bio: remote.descripcion || remote.bio
+            });
+            setLocalProfile(merged);
+            loadProfileInfo();
+          }
+        } else {
+          toast("Perfil guardado localmente (no se pudo sincronizar)");
+        }
+      } else {
+        toast("Perfil guardado localmente");
+      }
+      hideProfileModal();
     };
   }
 
-  // Avatar upload
+  /* ----------------------
+     Avatar upload: guardamos local y tratamos de enviar al API también
+     - Enviamos como dataURL en el PUT (si tu backend lo acepta)
+     - Si prefieres subir la imagen a Cloudinary/S3 y guardar URL, adapta aquí.
+  ---------------------- */
   if (btnUpload && avatarUpload) {
     btnUpload.onclick = () => avatarUpload.click();
-    avatarUpload.onchange = e => {
+    avatarUpload.onchange = async (e) => {
       const f = e.target.files && e.target.files[0];
       if (!f) return;
       const maxMB = 3;
@@ -316,64 +355,97 @@
         return toast(`Imagen demasiado grande (máx ${maxMB}MB)`);
       }
       const reader = new FileReader();
-      reader.onload = () => {
-        const prof = getUser();
-        prof.avatar = reader.result;
-        LS.setItem(profileKey, JSON.stringify(prof));
+      reader.onload = async () => {
+        const dataUrl = reader.result;
+        const prof = getLocalProfile();
+        prof.avatar = dataUrl;
+        setLocalProfile(prof);
         loadProfileInfo();
-        toast("Avatar actualizado", 1400);
+        toast("Avatar actualizado localmente");
+
+        // intentar sincronizar avatar con API
+        if (activeId && API_BASE) {
+          const res = await saveProfileToAPI({
+            name: prof.name,
+            avatar: prof.avatar,
+            bio: prof.bio
+          });
+          if (res.ok) {
+            toast("Avatar sincronizado con servidor");
+          } else {
+            toast("Avatar guardado localmente (no se pudo subir)");
+          }
+        }
       };
       reader.readAsDataURL(f);
       avatarUpload.value = "";
     };
   }
 
-  // Notas: modal simple
+  /* ----------------------
+     Notas: añadir nota simple
+  ---------------------- */
   if (addNoteBtnProfile) {
     addNoteBtnProfile.onclick = () => {
-      const noteModal = document.createElement("div");
-      noteModal.style.cssText = `
-        position: fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-        background: #fff; padding: 20px; border-radius:16px;
-        box-shadow:0 8px 24px rgba(0,0,0,0.3); z-index:10000;
-        width: 90%; max-width:400px; display:flex; flex-direction:column; gap:12px;
-        font-family:sans-serif;
-      `;
-      noteModal.innerHTML = `
-        <textarea placeholder="Escribe tu nota..." style="width:100%; height:120px; padding:10px; border:1px solid #ccc; border-radius:10px; resize:none; font-size:1rem;"></textarea>
-        <div style="display:flex; justify-content:flex-end; gap:10px;">
-          <button id="cancelNote" style="padding:8px 16px; border:none; border-radius:10px; cursor:pointer; background:#ccc; color:#333; font-weight:600;">Cancelar</button>
-          <button id="saveNote" style="padding:8px 16px; border:none; border-radius:10px; cursor:pointer; background:#3a7bfc; color:#fff; font-weight:600;">Guardar</button>
+      const modal = document.createElement("div");
+      modal.style.cssText = "position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9999;background:#fff;padding:14px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.2);";
+      modal.innerHTML = `
+        <textarea placeholder="Escribe tu nota..." style="width:300px;height:120px;padding:8px;border-radius:8px;border:1px solid #ddd;"></textarea>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+          <button id="ntCancel" style="padding:8px 12px;border-radius:8px;background:#ccc;border:none;">Cancelar</button>
+          <button id="ntSave" style="padding:8px 12px;border-radius:8px;background:#3a7bfc;color:#fff;border:none;">Guardar</button>
         </div>
       `;
-      document.body.appendChild(noteModal);
-
-      const textarea = noteModal.querySelector("textarea");
-      const cancelNote = noteModal.querySelector("#cancelNote");
-      const saveNote = noteModal.querySelector("#saveNote");
-
-      cancelNote.onclick = () => noteModal.remove();
-
-      saveNote.onclick = () => {
-        const txt = textarea.value.trim();
-        if (!txt) return toast("La nota está vacía", 1500);
-        const prof = getUser();
+      document.body.appendChild(modal);
+      modal.querySelector("#ntCancel").onclick = () => modal.remove();
+      modal.querySelector("#ntSave").onclick = () => {
+        const txt = modal.querySelector("textarea").value.trim();
+        if (!txt) return toast("La nota está vacía");
+        const prof = getLocalProfile();
         prof.notes ||= [];
         prof.notes.unshift({ id: genId(), text: txt, ts: Date.now() });
-        LS.setItem(profileKey, JSON.stringify(prof));
-        noteModal.remove();
+        setLocalProfile(prof);
+        modal.remove();
         loadProfileInfo();
-        toast("Nota agregada", 1600);
+        toast("Nota añadida");
       };
     };
   }
 
-  // Top buttons
+  /* ----------------------
+     Botones superiores
+  ---------------------- */
   if (goFeed) goFeed.onclick = () => window.location.href = "../pages/publicaciones.html";
   if (logoutBtn) logoutBtn.onclick = () => { LS.removeItem("usuarioActivo"); window.location.href = "../pages/login.html"; };
 
-  // Init (seguro)
-  loadProfileInfo();
-  renderProfilePosts();
+  /* ----------------------
+     Inicialización: intenta sincronizar desde API (GET) si es posible
+     - Si la API responde, usamos la versión remota y la guardamos local
+     - Si no, usamos local
+  ---------------------- */
+  (async function init() {
+    // primero cargamos local para que la UI no quede vacía
+    loadProfileInfo();
+
+    // intentar sincronizar desde API si hay ID y API definida
+    if (activeId && API_BASE) {
+      const remote = await fetchProfileFromAPI();
+      if (remote) {
+        // remote ya fue guardado en local por fetchProfileFromAPI
+        loadProfileInfo(remote);
+        toast("Perfil sincronizado con servidor");
+      } else {
+        // no alcanzó API -> quedarse con local
+        toast("Usando perfil local");
+      }
+    } else {
+      // sin id o sin API -> quedamos en local
+      // si tienes email-only workflows, podríamos intentar otra ruta, pero depende del backend
+      // Por ahora: usar local
+      // (no toast obligatorio)
+    }
+
+    renderProfilePosts();
+  })();
 
 })();

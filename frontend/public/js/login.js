@@ -1,7 +1,6 @@
 // ===========================================================
 // 🌐 login.js — Seguro y listo para producción
 // ===========================================================
-
 document.addEventListener("DOMContentLoaded", () => {
 
   // ===========================================================
@@ -74,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ===========================================================
-  // VALIDACIONES
+  // Validaciones
   // ===========================================================
   function validarCorreo(correo) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
@@ -102,44 +101,37 @@ document.addEventListener("DOMContentLoaded", () => {
   loginForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const inputNombre = document.getElementById("login-username");
-    const inputPassword = loginForm.querySelector('input[type="password"]');
+    const inputCorreo = document.getElementById("login-correo");
+    const inputPassword = document.getElementById("login-password");
 
-    const nombre = inputNombre ? inputNombre.value.trim() : "";
-    const password = inputPassword ? inputPassword.value.trim() : "";
+    if (!inputCorreo || !inputPassword) return console.error("Inputs de login no encontrados");
 
-    if (!nombre || !password) return showToast("Completa todos los campos", "warn");
-    if (!validarNombre(nombre)) return showToast("El nombre mínimo debe tener 3 caracteres", "warn");
+    const correo = inputCorreo.value.trim();
+    const password = inputPassword.value.trim();
+
+    if (!correo || !password) {
+      showToast("Completa todos los campos", "warn");
+      toggleFormLoading(loginForm, false);
+      return;
+    }
 
     toggleFormLoading(loginForm, true);
 
     try {
-      // 🔹 ADMIN LOGIN
-      const adminResp = await fetch(`${API_ADMIN}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ nombre, password }),
-      });
-
-      if (adminResp.ok) {
-        const data = await adminResp.json();
-        localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
-        localStorage.setItem("adminSession", "true");
-        showToast(`Bienvenido administrador`, "success");
-        return setTimeout(() => (window.location.href = "admin.html"), 1200);
-      }
-
-      // 🔹 USUARIO NORMAL
+      // 🔹 LOGIN NORMAL
       const userResp = await fetch(`${API_USUARIOS}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: nombre, password }),
+        body: JSON.stringify({ email: correo, password }),
       });
 
       const data = await userResp.json();
 
-      if (!userResp.ok) return showToast(data.error || "Credenciales incorrectas", "error");
+      if (!userResp.ok) {
+        showToast(data.error || "Credenciales incorrectas", "error");
+        toggleFormLoading(loginForm, false);
+        return;
+      }
 
       localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
       showToast(`Bienvenido ${data.usuario.nombre}`, "success");
@@ -154,18 +146,23 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ===========================================================
-  // REGISTRO
+  // REGISTRO — Usuarios
   // ===========================================================
   registerForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const inputNombre = document.getElementById("reg-username");
-    const inputCorreo = document.getElementById("reg-correo");
-    const inputPassword = document.getElementById("reg-password");
+    const inputNombre = registerForm.querySelector("#reg-username");
+    const inputCorreo = registerForm.querySelector("#reg-correo");
+    const inputPassword = registerForm.querySelector("#reg-password");
 
-    const nombre = inputNombre ? inputNombre.value.trim() : "";
-    const email = inputCorreo ? inputCorreo.value.trim() : "";
-    const password = inputPassword ? inputPassword.value.trim() : "";
+    if (!inputNombre || !inputCorreo || !inputPassword) {
+      console.error("Inputs de registro no encontrados");
+      return;
+    }
+
+    const nombre = inputNombre.value.trim();
+    const email = inputCorreo.value.trim();
+    const password = inputPassword.value.trim();
 
     if (!nombre || !email || !password) {
       showToast("Completa todos los campos", "warn");
@@ -200,23 +197,23 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify({ nombre, email, password })
       });
 
-      let data = {};
-      try { data = await resp.json(); } catch (err) { console.error("Error parseando JSON:", err); }
+      const data = await resp.json();
 
       if (!resp.ok) {
-        // Mostrar el mensaje exacto del backend
-        return showToast(data.error || data.msg || "Error en el registro", "error");
+        showToast(data.error || data.msg || "Error en el registro", "error");
+        toggleFormLoading(registerForm, false);
+        return;
       }
 
       showToast("Cuenta creada con éxito 🎉", "success");
       setTimeout(() => loginTab?.click(), 600);
 
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       showToast("Error al conectar con el servidor", "error");
     }
 
     toggleFormLoading(registerForm, false);
   });
 
-}); // fin DOMContentLoaded
+});

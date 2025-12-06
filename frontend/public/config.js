@@ -1,51 +1,42 @@
 /* ===========================================================
-   🌐 CONFIG BLOGME — Producción y Local
+   🌐 CONFIG GLOBAL DE BLOGME
+   Funciona en Vercel (frontend) + Render (backend)
 =========================================================== */
 
-// Detecta si estás en un dominio de producción (Vercel o Render)
-const HOST = window.location.hostname;
-const IS_PRODUCTION =
-  HOST.includes("vercel.app") || HOST.includes("onrender.com");
+// Detecta si frontend está online (Vercel)
+const IS_VERCEL = window.location.hostname.includes("vercel.app");
 
-// URL automática
-window.API_BASE_URL =
-  window.location.hostname.includes("localhost") ||
-  window.location.hostname.includes("127.0.0.1")
-    ? "http://localhost:3000"
-    : "https://blogme2-1.onrender.com";
+// 🔹 Si carga desde Vercel = usar backend Render.
+// 🔹 Si es local = usar localhost backend.
+window.API_BASE_URL = IS_VERCEL
+  ? "https://blogme2-1.onrender.com"
+  : "http://localhost:3000";
 
+// 🔥 Asegura que existe globalmente
+console.log("🌍 API apuntando a:", window.API_BASE_URL);
 
-// Endpoints API globales
-window.API_ADMIN = `${API_BASE_URL}/api/admin`;
-window.API_USUARIOS = `${API_BASE_URL}/api/usuarios`;
-window.API_PUBLICACIONES = `${API_BASE_URL}/api/publicaciones`;
+// Rutas API correctas
+window.API_ADMIN = `${window.API_BASE_URL}/api/admin`;
+window.API_USUARIOS = `${window.API_BASE_URL}/api/usuarios`;
+window.API_PUBLICACIONES = `${window.API_BASE_URL}/api/publicaciones`;
 
-// Ping para despertar backend
+// Despertar backend en Render
 window.wakeBackend = async function () {
   try {
-    await fetch(`${API_BASE_URL}/api/ping`);
-  } catch (e) {}
+    await fetch(`${window.API_BASE_URL}/api/ping`, { method: "GET" });
+  } catch {}
 };
 
-/* ===========================================================
-   🟦 Obtener usuario actual
-=========================================================== */
 window.getUser = function () {
   const raw = localStorage.getItem("usuarioActivo");
   if (!raw) return null;
 
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
+  try { return JSON.parse(raw); }
+  catch { return null; }
 };
 
-/* ===========================================================
-   🟥 Cerrar sesión
-=========================================================== */
 window.logout = function () {
   localStorage.removeItem("usuarioActivo");
   localStorage.removeItem("adminSession");
-  window.location.href = "/pages/login.html"; // <-- Ruta correcta en deploy
+  window.location.href = "login.html";
 };

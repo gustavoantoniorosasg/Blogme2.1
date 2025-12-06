@@ -21,7 +21,7 @@
 <body>
 
   <!-- Loader global -->
-  <div id="loader" class="page-loader">Cargando...</div>
+  <div id="loader" class="page-loader" style="display:none">Cargando...</div>
 
   <!-- TOPBAR -->
   <header class="topbar">
@@ -111,8 +111,8 @@
         <h4>Tu perfil</h4>
 
         <div class="pv">
-          <!-- ruta corregida -->
-          <img id="pvAvatar" src="assents/img/avatar-placeholder.png">
+          <!-- RUTA CORREGIDA: usa images desde raíz -->
+          <img id="pvAvatar" src="/images/decoraciones/avatar-placeholder.png" alt="avatar">
           <div>
             <strong id="pvName">Cargando...</strong>
             <p id="pvBio">---</p>
@@ -151,7 +151,29 @@
 
   </main>
 
-  <!-- Scripts -->
+  <!-- MODAL DE COMENTARIOS (NECESARIO PARA comments.js) -->
+  <div id="commentsModal" class="modal hidden">
+    <div class="modal-content">
+      <button id="closeComments" class="close">✕</button>
+      <div id="commentsArea"></div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMACIÓN (opcional, en caso publicaciones.js lo usa) -->
+  <div id="confirmModal" class="modal hidden">
+    <div class="modal-content small">
+      <div id="confirmBody"></div>
+      <div class="modal-actions">
+        <button id="confirmCancel" class="btn-ghost">Cancelar</button>
+        <button id="confirmOk" class="btn-primary">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- SCRIPTS -->
   <script src="../js/comments.js" defer></script>
   <script src="../js/perfil.js" defer></script>
   <script src="../js/publicaciones.js" defer></script>

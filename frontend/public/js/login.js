@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const userResp = await fetch(`${API_USUARIOS}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, password }),
+        body: JSON.stringify({ email: nombre, password }),
       });
 
       const data = await userResp.json();
@@ -167,10 +167,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = inputCorreo ? inputCorreo.value.trim() : "";
     const password = inputPassword ? inputPassword.value.trim() : "";
 
-    if (!nombre || !email || !password) return showToast("Completa todos los campos", "warn");
-    if (!validarNombre(nombre)) return showToast("El nombre mínimo debe tener 3 caracteres", "warn");
-    if (!validarCorreo(email)) return showToast("Correo inválido", "warn");
-    if (!validarPassword(password)) return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
+    if (!nombre || !email || !password) {
+      showToast("Completa todos los campos", "warn");
+      toggleFormLoading(registerForm, false);
+      return;
+    }
+
+    if (!validarNombre(nombre)) {
+      showToast("El nombre mínimo debe tener 3 caracteres", "warn");
+      toggleFormLoading(registerForm, false);
+      return;
+    }
+
+    if (!validarCorreo(email)) {
+      showToast("Correo inválido", "warn");
+      toggleFormLoading(registerForm, false);
+      return;
+    }
+
+    if (!validarPassword(password)) {
+      showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
+      toggleFormLoading(registerForm, false);
+      return;
+    }
 
     toggleFormLoading(registerForm, true);
 
@@ -182,10 +201,11 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       let data = {};
-      try { data = await resp.json(); } catch {}
+      try { data = await resp.json(); } catch (err) { console.error("Error parseando JSON:", err); }
 
       if (!resp.ok) {
-        return showToast(data.msg || data.error || "Error en el registro", "error");
+        // Mostrar el mensaje exacto del backend
+        return showToast(data.error || data.msg || "Error en el registro", "error");
       }
 
       showToast("Cuenta creada con éxito 🎉", "success");

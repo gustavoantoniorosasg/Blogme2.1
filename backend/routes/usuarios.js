@@ -1,3 +1,6 @@
+// ===========================================================
+// 🌐 usuarios.js — API de usuarios
+// ===========================================================
 import express from "express";
 import Usuario from "../models/Usuario.js";
 import bcrypt from "bcrypt";
@@ -22,13 +25,16 @@ router.post("/registro", async (req, res) => {
       return res.status(400).json({ error: "Faltan datos" });
     }
 
+    // Verificar si ya existe el email
     const existe = await Usuario.findOne({ email });
     if (existe) {
       return res.status(400).json({ error: "El correo ya existe" });
     }
 
+    // Encriptar contraseña
     const passwordEncriptada = await bcrypt.hash(password, 10);
 
+    // Crear nuevo usuario
     const nuevo = new Usuario({
       nombre,
       email,
@@ -38,7 +44,8 @@ router.post("/registro", async (req, res) => {
 
     await nuevo.save();
 
-    res.json({ message: "Usuario registrado", usuario: nuevo });
+    // ✅ Responder correctamente al frontend
+    res.status(201).json({ message: "Usuario registrado con éxito", usuario: nuevo });
 
   } catch (err) {
     console.error(err);
@@ -52,6 +59,10 @@ router.post("/registro", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Faltan datos" });
+    }
 
     const usuario = await Usuario.findOne({ email });
     if (!usuario) return res.status(404).json({ error: "No existe el usuario" });
@@ -96,6 +107,7 @@ router.put("/:id", async (req, res) => {
   try {
     const data = req.body;
 
+    // Evitar sobrescribir la contraseña directamente
     delete data.password;
 
     const actualizado = await Usuario.findByIdAndUpdate(req.params.id, data, {

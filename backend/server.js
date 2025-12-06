@@ -23,12 +23,13 @@ app.use(express.urlencoded({ extended: true }));
 // CORS FIJO Y FUNCIONANDO PARA VERCEL
 app.use(cors({
   origin: [
-    "https://blogme2-1.vercel.app", // dominio real del frontend
+    "https://blogme2-1.vercel.app",  // 🔥 ESTE ES EL ACTUAL CORRECTO
+    "https://blogme2-1-bqhl.vercel.app", 
     "http://localhost:5173",
     "http://localhost:3000"
   ],
   credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 

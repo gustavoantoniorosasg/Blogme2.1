@@ -14,33 +14,40 @@ import Admin from "./models/Admin.js";
 import usuarios from "./routes/usuarios.js";
 import adminRoutes from "./routes/admin.js";
 import publicacionesRoutes from "./routes/publicaciones.js";
-// Seguridad básica para producción
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-// Middlewares
+// CORS FIJO Y FUNCIONANDO PARA VERCEL
 app.use(cors({
   origin: [
-    "https://blogme2-1-bqhl.vercel.app", 
+    "https://blogme2-1.vercel.app", // dominio real del frontend
     "http://localhost:5173",
     "http://localhost:3000"
   ],
   credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
+// habilitar preflight
+app.options("*", cors());
 
+// headers globales
 app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://blogme2-1.vercel.app");
   res.header("Access-Control-Allow-Credentials", "true");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
   next();
 });
 
-// 🔹 Conexión MongoDB usando .env
+// 🔹 Conexión MongoDB
 const conectarDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
@@ -54,7 +61,6 @@ const conectarDB = async () => {
   }
 };
 
-// 🔹 Crear Admin por defecto
 const crearAdminPorDefecto = async () => {
   try {
     const existeAdmin = await Admin.findOne({ username: "admin" });
@@ -75,7 +81,6 @@ const crearAdminPorDefecto = async () => {
   }
 };
 
-// Conectar BD
 conectarDB();
 
 // Rutas API

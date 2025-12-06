@@ -108,7 +108,7 @@ const password = document.getElementById("login-password").value.trim();
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ nombre, password }),
+      body: JSON.stringify({ email, password }),
     });
 
     if (adminResp.ok) {

@@ -1,7 +1,7 @@
 // ===========================================================
 // 🌐 IMPORTAR VARIABLES GLOBALES
 // ===========================================================
-import { API_ADMIN, API_USUARIOS } from "../config.js";
+
 
 console.log("🌍 API apuntando a:", API_ADMIN);
 

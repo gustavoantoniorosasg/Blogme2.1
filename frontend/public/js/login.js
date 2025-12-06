@@ -90,7 +90,7 @@ function validarPassword(pass) {
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const nombre = document.getElementById("login-username").value.trim();
+  const email = document.getElementById("login-correo").value.trim();
   const password = loginForm.querySelector('input[type="password"]').value.trim();
 
   if (!nombre || !password) return showToast("Completa todos los campos", "warn");
@@ -101,7 +101,7 @@ loginForm.addEventListener("submit", async (e) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ nombre, password }),
+      body: JSON.stringify({ email, password }),
     });
 
     if (adminResp.ok) {
@@ -116,7 +116,7 @@ loginForm.addEventListener("submit", async (e) => {
     const userResp = await fetch(`${API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre, password }),
+      body: JSON.stringify({ email, password }),
     });
 
     const data = await userResp.json();

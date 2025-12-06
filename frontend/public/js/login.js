@@ -2,9 +2,8 @@
 // 🌐 Variables globales desde config.js
 // ===========================================================
 
-
 // ===========================================================
-// 🔵 SISTEMA DE TOAST NOTIFICACIONES
+// 🔵 SISTEMA DE TOAST
 // ===========================================================
 function showToast(msg, type = "info") {
   let toast = document.getElementById("toast");
@@ -23,7 +22,7 @@ function showToast(msg, type = "info") {
   }, 2800);
 }
 
-// Toast estilos dinámicos
+// Toast estilos
 const style = document.createElement("style");
 style.innerHTML = `
 #toast {
@@ -83,23 +82,10 @@ function validarCorreo(correo) {
 function validarPassword(pass) {
   return pass.length >= 6;
 }
-function validarNombre(nombre) {
-  return nombre.length >= 3;
-}
 
 
 // ===========================================================
-// Loader para evitar doble clic
-// ===========================================================
-function toggleFormLoading(form, state) {
-  const button = form.querySelector("button[type='submit']");
-  button.disabled = state;
-  button.innerText = state ? "Procesando..." : "Entrar / Registrarse";
-}
-
-
-// ===========================================================
-// LOGIN — Ahora pide NOMBRE y contraseña
+// LOGIN — Admin + Usuario (por NOMBRE)
 // ===========================================================
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -107,16 +93,10 @@ loginForm.addEventListener("submit", async (e) => {
   const nombre = document.getElementById("login-username").value.trim();
   const password = loginForm.querySelector('input[type="password"]').value.trim();
 
-  if (!nombre || !password) 
-    return showToast("Completa todos los campos", "warn");
-
-  if (!validarNombre(nombre))
-    return showToast("El nombre mínimo debe tener 3 caracteres", "warn");
-
-  toggleFormLoading(loginForm, true);
+  if (!nombre || !password) return showToast("Completa todos los campos", "warn");
 
   try {
-    // 🔹 ADMIN LOGIN POR NOMBRE
+    // ADMIN LOGIN
     const adminResp = await fetch(`${API_ADMIN}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -129,13 +109,10 @@ loginForm.addEventListener("submit", async (e) => {
       localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
       localStorage.setItem("adminSession", "true");
       showToast(`Bienvenido administrador`, "success");
-
-      return setTimeout(() => {
-        window.location.href = "admin.html";
-      }, 1200);
+      return setTimeout(() => (window.location.href = "admin.html"), 1200);
     }
 
-    // 🔹 USUARIO LOGIN NORMAL
+    // LOGIN USUARIO NORMAL
     const userResp = await fetch(`${API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -148,23 +125,18 @@ loginForm.addEventListener("submit", async (e) => {
       return showToast(data.error || "Credenciales incorrectas", "error");
 
     localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
-
     showToast(`Bienvenido ${data.usuario.nombre}`, "success");
-
     setTimeout(() => (window.location.href = "publicaciones.html"), 900);
 
   } catch (err) {
     console.error(err);
     showToast("No se pudo conectar al servidor", "error");
   }
-
-  toggleFormLoading(loginForm, false);
 });
 
 
-
 // ===========================================================
-// REGISTRO REAL de usuarios
+// REGISTRO REAL
 // ===========================================================
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -173,19 +145,9 @@ registerForm.addEventListener("submit", async (e) => {
   const email = document.getElementById("reg-correo").value.trim();
   const password = document.getElementById("reg-password").value.trim();
 
-  if (!nombre || !email || !password)
-    return showToast("Completa todos los campos", "warn");
-
-  if (!validarNombre(nombre))
-    return showToast("El nombre debe tener mínimo 3 caracteres", "warn");
-
-  if (!validarCorreo(email))
-    return showToast("Correo inválido", "warn");
-
-  if (!validarPassword(password))
-    return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
-
-  toggleFormLoading(registerForm, true);
+  if (!nombre || !email || !password) return showToast("Completa todos los campos", "warn");
+  if (!validarCorreo(email)) return showToast("Correo inválido", "warn");
+  if (!validarPassword(password)) return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
 
   try {
     const resp = await fetch(`${API_USUARIOS}/registro`, {
@@ -211,6 +173,4 @@ registerForm.addEventListener("submit", async (e) => {
     console.error(error);
     showToast("Error al conectar con el servidor", "error");
   }
-
-  toggleFormLoading(registerForm, false);
 });

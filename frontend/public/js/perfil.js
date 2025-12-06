@@ -66,7 +66,7 @@
   if(!LS.getItem(profileKey)){
     const def = { 
       name: user, 
-      avatar: "../../public/images/decoraciones/avatar-placeholder.png",
+      avatar: "/images/decoraciones/avatar-placeholder.png",
       bio: "Hola! Soy nuevo en BlogMe.",
       notes: [{ id: genId(), text: "¡Mi primera nota!", ts: Date.now() }]
     };
@@ -104,8 +104,8 @@
     const prof = getUser();
     profileName.textContent = prof.name || "Invitado";
     profileBio.textContent = prof.bio || "Sin bio — ¡edítala!";
-    profileAvatar.src = prof.avatar || "../../public/images/decoraciones/avatar-placeholder.png";
-    if(topAvatar) topAvatar.src = prof.avatar || "../../public/images/decoraciones/avatar-placeholder.png";
+    profileAvatar.src = prof.avatar || "/images/decoraciones/avatar-placeholder.png";
+    if(topAvatar) topAvatar.src = prof.avatar || "/images/decoraciones/avatar-placeholder.png";
     if(topName) topName.textContent = prof.name || "Invitado";
     if(topNotesCount) topNotesCount.textContent = `${(prof.notes||[]).length} notas`;
     if(notesCountEl) notesCountEl.textContent = (prof.notes||[]).length;

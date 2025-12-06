@@ -90,9 +90,11 @@ function validarPassword(pass) {
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const email = document.getElementById("login-email").value.trim();
-  const password = document.getElementById("login-password").value.trim();
+  // ✔ ahora sí obtenemos el nombre
+  const nombre = document.getElementById("login-username")?.value?.trim();
+  const password = document.getElementById("login-password")?.value?.trim();
 
+  // 🔥 si algún input no existe o está vacío se evita romper
   if (!nombre || !password)
     return showToast("Completa todos los campos", "warn");
 
@@ -100,7 +102,7 @@ loginForm.addEventListener("submit", async (e) => {
     return showToast("Contraseña inválida", "warn");
 
   try {
-    // 1️⃣ Intentar LOGIN ADMIN
+    // 1️⃣ LOGIN ADMIN
     const adminResp = await fetch(`${API_ADMIN}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

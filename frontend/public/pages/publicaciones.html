@@ -4,21 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>BlogMe | Publicaciones</title>
-    <!-- Aquí cargas config.js para definir la URL base del backend -->
+
+  <!-- Config global -->
   <script src="../config.js"></script>
 
-  <!-- CSS PRINCIPAL -->
+  <!-- CSS -->
   <link rel="stylesheet" href="../styles/publicaciones.css">
   <link rel="stylesheet" href="../styles/comments.css">
 
-  <!-- ICONOS -->
+  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <!-- DARK MODE AUTO -->
   <meta name="color-scheme" content="light dark">
 </head>
 
 <body>
+
+  <!-- Loader global -->
+  <div id="loader" class="page-loader">Cargando...</div>
 
   <!-- TOPBAR -->
   <header class="topbar">
@@ -51,7 +54,7 @@
         <button id="darkToggle" class="btn-nav" title="Tema">
           <i class="fa-solid fa-moon"></i>
         </button>
-        
+
         <a class="btn-nav" href="./publicaciones.html">Inicio</a>
         <a class="btn-nav" href="./perfil.html">Perfil</a>
 
@@ -62,13 +65,13 @@
     </nav>
   </header>
 
-  <!-- LAYOUT PRINCIPAL -->
+  <!-- LAYOUT -->
   <main class="container">
 
     <!-- PANEL IZQUIERDO -->
     <aside class="left-pane">
 
-      <!-- CREAR PUBLICACIÓN -->
+      <!-- CREAR -->
       <section class="create-box">
         <h3>Crear publicación</h3>
 
@@ -100,7 +103,6 @@
         <div class="actions-row">
           <button id="btnPublish" class="btn-primary">Publicar</button>
           <button id="btnClear" class="btn-ghost">Limpiar</button>
-          
         </div>
       </section>
 
@@ -109,7 +111,8 @@
         <h4>Tu perfil</h4>
 
         <div class="pv">
-          <img id="pvAvatar" src="../images/avatar-placeholder.png">
+          <!-- ruta corregida -->
+          <img id="pvAvatar" src="/images/avatar-placeholder.png">
           <div>
             <strong id="pvName">Cargando...</strong>
             <p id="pvBio">---</p>
@@ -125,7 +128,7 @@
 
     </aside>
 
-    <!-- FEED CENTRADO GRANDE -->
+    <!-- FEED -->
     <section id="feed" class="feed">
       <div id="infiniteLoader" class="infinite-loader">Cargando...</div>
     </section>
@@ -133,13 +136,11 @@
     <!-- PANEL DERECHO -->
     <aside class="right-pane">
 
-      <!-- TENDENCIAS -->
       <section class="trending">
         <h4>Tendencias</h4>
         <ul id="trendingList"></ul>
       </section>
 
-      <!-- NOTAS -->
       <section class="notes">
         <h4>Notas compartidas</h4>
         <div id="notesList"></div>
@@ -150,31 +151,9 @@
 
   </main>
 
-  <!-- MODAL DE COMENTARIOS -->
-  <div id="commentsModal" class="modal hidden">
-    <div class="modal-content">
-      <button id="closeComments" class="close">✕</button>
-      <div id="commentsArea"></div>
-    </div>
-  </div>
-
-  <!-- MODAL CONFIRMACIÓN -->
-  <div id="confirmModal" class="modal hidden">
-    <div class="modal-content small">
-      <div id="confirmBody"></div>
-      <div class="modal-actions">
-        <button id="confirmCancel" class="btn-ghost">Cancelar</button>
-        <button id="confirmOk" class="btn-primary">Confirmar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- TOAST -->
-  <div id="toast" class="toast hidden"></div>
-
-  <!-- SCRIPTS -->
+  <!-- Scripts -->
   <script src="../js/comments.js" defer></script>
-  <script src="../js/perfil-mini.js" defer></script>
+  <script src="../js/perfil.js" defer></script>
   <script src="../js/publicaciones.js" defer></script>
 
 </body>

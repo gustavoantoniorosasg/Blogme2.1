@@ -99,7 +99,7 @@ loginForm.addEventListener("submit", async (e) => {
 
   try {
     // ADMIN LOGIN
-    const adminResp = await fetch(`${API_ADMIN}/registro`, {
+    const resp = await fetch(`${API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -115,7 +115,7 @@ loginForm.addEventListener("submit", async (e) => {
     }
 
     // USUARIO LOGIN
-    const userResp = await fetch(`${API_USUARIOS}/login`, {
+    const userResp = await fetch(`${API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),

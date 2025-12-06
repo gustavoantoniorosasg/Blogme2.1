@@ -96,7 +96,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ===========================================================
-  // LOGIN — Admin + Usuario
+  // Variables de endpoints globales
+  // ===========================================================
+  const API_USUARIOS = window.API_USUARIOS;
+  const API_ADMIN = window.API_ADMIN;
+
+  // ===========================================================
+  // LOGIN — Usuarios
   // ===========================================================
   loginForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -104,12 +110,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputCorreo = document.getElementById("login-correo");
     const inputPassword = document.getElementById("login-password");
 
-    if (!inputCorreo || !inputPassword) return console.error("Inputs de login no encontrados");
+    if (!inputCorreo || !inputPassword) {
+      console.error("Inputs de login no encontrados");
+      return;
+    }
 
-    const correo = inputCorreo.value.trim();
+    const email = inputCorreo.value.trim();
     const password = inputPassword.value.trim();
 
-    if (!correo || !password) {
+    if (!email || !password) {
       showToast("Completa todos los campos", "warn");
       toggleFormLoading(loginForm, false);
       return;
@@ -119,15 +128,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       // 🔹 LOGIN NORMAL
-      const userResp = await fetch(`${API_USUARIOS}/login`, {
+      const resp = await fetch(`${API_USUARIOS}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: correo, password }),
+        body: JSON.stringify({ email, password }),
       });
 
-      const data = await userResp.json();
+      const data = await resp.json();
 
-      if (!userResp.ok) {
+      if (!resp.ok) {
         showToast(data.error || "Credenciales incorrectas", "error");
         toggleFormLoading(loginForm, false);
         return;
@@ -194,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const resp = await fetch(`${API_USUARIOS}/registro`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, email, password })
+        body: JSON.stringify({ nombre, email, password }),
       });
 
       const data = await resp.json();

@@ -99,7 +99,7 @@ loginForm.addEventListener("submit", async (e) => {
 
   try {
     // ADMIN LOGIN
-    const adminResp = await fetch(`${API_ADMIN}/login`, {
+    const adminResp = await fetch(`${API_ADMIN}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -115,7 +115,7 @@ loginForm.addEventListener("submit", async (e) => {
     }
 
     // USUARIO LOGIN
-    const userResp = await fetch(`${API_USUARIOS}/login`, {
+    const userResp = await fetch(`${API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -153,22 +153,16 @@ registerForm.addEventListener("submit", async (e) => {
   if (!validarPassword(password)) return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
 
   try {
-    const resp = await fetch(`${API_USUARIOS}/registro`, {
+    fetch(`${API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre, email, password })
+      credentials: "include",
+      body: JSON.stringify({ nombre, email, password }),
     });
 
-    let data = {};
+    const data = await resp.json();
 
-    try { data = await resp.json(); } catch {}
-
-    if (!resp.ok) {
-      return showToast(
-        data.msg || data.error || "Error en el registro",
-        "error"
-      );
-    }
+    if (!resp.ok) return showToast(data.msg || "Error en el registro", "error");
 
     showToast("Cuenta creada con éxito", "success");
     setTimeout(() => loginTab.click(), 600);

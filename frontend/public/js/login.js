@@ -1,9 +1,12 @@
 // ===========================================================
-// 🌐 Variables globales desde config.js
+// 🌐 IMPORTAR VARIABLES GLOBALES
 // ===========================================================
+import { API_ADMIN, API_USUARIOS } from "./config.js";
+
+console.log("🌍 API apuntando a:", API_ADMIN);
 
 // ===========================================================
-// 🔵 SISTEMA DE TOAST
+// 🔔 TOAST SYSTEM
 // ===========================================================
 function showToast(msg, type = "info") {
   let toast = document.getElementById("toast");
@@ -19,39 +22,39 @@ function showToast(msg, type = "info") {
 
   setTimeout(() => {
     toast.className = toast.className.replace("show", "");
-  }, 2800);
+  }, 2500);
 }
 
-// Toast estilos
-const style = document.createElement("style");
-style.innerHTML = `
+// Toast Style
+const toastStyle = document.createElement("style");
+toastStyle.innerHTML = `
 #toast {
   visibility: hidden;
-  min-width: 260px;
-  background: rgba(0,0,0,0.78);
-  color: #fff;
+  min-width: 240px;
+  background: rgba(0,0,0,0.80);
+  color: white;
   text-align: center;
   border-radius: 6px;
-  padding: 14px;
+  padding: 12px;
   position: fixed;
   left: 50%;
-  bottom: 35px;
+  bottom: 30px;
   transform: translateX(-50%);
-  font-size: 15px;
+  font-size: 14px;
   opacity: 0;
-  transition: opacity .4s ease-in-out;
+  transition: opacity .3s;
   z-index: 9999;
 }
 #toast.show { visibility: visible; opacity: 1; }
-#toast.success { background: #28a745d9; }
-#toast.error { background: #dc3545d9; }
-#toast.warn { background: #ffc107d9; color: #222; }
+#toast.success { background: #28a745cc; }
+#toast.error { background: #dc3545cc; }
+#toast.warn { background: #ffc107cc; color: #000; }
 `;
-document.head.appendChild(style);
+document.head.appendChild(toastStyle);
 
 
 // ===========================================================
-// 🔄 Cambiar entre login y registro 
+// 🔄 CAMBIO LOGIN / REGISTRO
 // ===========================================================
 const loginTab = document.getElementById("login-tab");
 const registerTab = document.getElementById("register-tab");
@@ -74,33 +77,35 @@ registerTab.addEventListener("click", () => {
 
 
 // ===========================================================
-// VALIDACIONES
+// ✨ VALIDACIONES
 // ===========================================================
-function validarCorreo(correo) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
-}
 function validarPassword(pass) {
   return pass.length >= 6;
 }
 
 
-// LOGIN — Admin + Usuario
+// ===========================================================
+// 🔐 LOGIN — Admin & Usuario
+// ===========================================================
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const email = document.getElementById("login-correo").value.trim();
-  const password = loginForm.querySelector('input[type="password"]').value.trim();
+  const nombre = document.getElementById("login-username").value.trim();
+  const password = document.getElementById("login-password").value.trim();
 
-  if (!email || !password) return showToast("Completa todos los campos", "warn");
-  if (!validarCorreo(email)) return showToast("Correo inválido", "warn");
+  if (!nombre || !password)
+    return showToast("Completa todos los campos", "warn");
+
+  if (!validarPassword(password))
+    return showToast("Contraseña inválida", "warn");
 
   try {
-    // ADMIN LOGIN
+    // 1️⃣ Intentar LOGIN ADMIN
     const adminResp = await fetch(`${API_ADMIN}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ nombre, password }),
     });
 
     if (adminResp.ok) {
@@ -108,33 +113,36 @@ loginForm.addEventListener("submit", async (e) => {
       localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
       localStorage.setItem("adminSession", "true");
       showToast(`Bienvenido administrador`, "success");
-      return setTimeout(() => (window.location.href = "admin.html"), 1200);
+      return setTimeout(() => (window.location.href = "/admin.html"), 800);
     }
 
-    // USUARIO LOGIN
-    const userResp = await fetch(`${API_USUARIOS}/login`, {
+    // 2️⃣ LOGIN Usuario Normal
+    const respUser = await fetch(`${API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ nombre, password }),
     });
 
-    const data = await userResp.json();
+    const data = await respUser.json();
 
-    if (!userResp.ok)
+    if (!respUser.ok)
       return showToast(data.error || "Credenciales incorrectas", "error");
 
     localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
-    showToast(`Bienvenido ${data.usuario.nombre}`, "success");
-    setTimeout(() => (window.location.href = "publicaciones.html"), 900);
+    localStorage.removeItem("adminSession");
 
-  } catch (err) {
-    console.error(err);
-    showToast("No se pudo conectar al servidor", "error");
+    showToast(`Bienvenido ${data.usuario.nombre}`, "success");
+    setTimeout(() => (window.location.href = "/publicaciones.html"), 700);
+
+  } catch (error) {
+    console.error(error);
+    showToast("No se pudo conectar con el servidor", "error");
   }
 });
 
+
 // ===========================================================
-// REGISTRO REAL
+// 📝 REGISTRO USUARIOS
 // ===========================================================
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -143,23 +151,27 @@ registerForm.addEventListener("submit", async (e) => {
   const email = document.getElementById("reg-correo").value.trim();
   const password = document.getElementById("reg-password").value.trim();
 
-  if (!nombre || !email || !password) return showToast("Completa todos los campos", "warn");
-  if (!validarCorreo(email)) return showToast("Correo inválido", "warn");
-  if (!validarPassword(password)) return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
+  if (!nombre || !email || !password)
+    return showToast("Completa todos los campos", "warn");
+
+  if (!validarPassword(password))
+    return showToast("La contraseña debe tener 6+ caracteres", "warn");
 
   try {
-    fetch(`${API_USUARIOS}/registro`, {
+    const resp = await fetch(`${API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify({ nombre, email, password }),
     });
 
-    const data = await resp.json();
+    let data = {};
+    try { data = await resp.json(); } catch {}
 
-    if (!resp.ok) return showToast(data.msg || "Error en el registro", "error");
+    if (!resp.ok) {
+      return showToast(data.msg || data.error || "Error al registrarse", "error");
+    }
 
-    showToast("Cuenta creada con éxito", "success");
+    showToast("Cuenta creada con éxito 🎉", "success");
     setTimeout(() => loginTab.click(), 600);
 
   } catch (error) {

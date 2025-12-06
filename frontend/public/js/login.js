@@ -1,49 +1,43 @@
-console.log("📌 login.js cargado correctamente");
+console.log("📌 login.js activo");
 
-// ==============================
-//  URLs correctas del backend
-// ==============================
+// ============================
+// 🔥 Despertar backend
+// ============================
+fetch("https://blogme2-1.onrender.com/api/usuarios/ping")
+  .then(() => console.log("⚡ Backend activo"))
+  .catch(() => console.warn("⚠ Backend no respondió ping"));
+
+// ============================
+// URLs API
+// ============================
 const API_BASE = "https://blogme2-1.onrender.com/api";
 const API_USUARIOS = `${API_BASE}/usuarios`;
 const API_ADMIN = `${API_BASE}/admin`;
 
-// ==============================
-//  SELECTORES UI
-// ==============================
+// ============================
+// Formularios
+// ============================
 const loginForm = document.getElementById("login-form");
 const registerForm = document.getElementById("register-form");
 
 const loginMsg = document.getElementById("login-msg");
 const registerMsg = document.getElementById("register-msg");
 
-const loginCorreo = document.getElementById("login-correo");
-const loginPassword = document.getElementById("login-password");
-
-const regUsername = document.getElementById("reg-username");
-const regCorreo = document.getElementById("reg-correo");
-const regPassword = document.getElementById("reg-password");
-
-// ==============================
-//  LOGIN
-// ==============================
+// ============================
+// LOGIN
+// ============================
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const email = loginCorreo.value.trim();
-  const password = loginPassword.value.trim();
-
-  if (!email || !password) {
-    loginMsg.textContent = "⚠️ Completa tus datos";
-    return;
-  }
+  const email = document.getElementById("login-correo").value.trim();
+  const password = document.getElementById("login-password").value.trim();
 
   loginMsg.textContent = "⏳ Validando...";
 
-  // 🔹 payload correcto
   const payload = { email, password };
 
   try {
-    // 👉 PRIMER INTENTO login usuario
+    // 🔹 primer intento: usuario normal
     let res = await fetch(`${API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -57,7 +51,7 @@ loginForm.addEventListener("submit", async (e) => {
       return;
     }
 
-    // 👉 SEGUNDO INTENTO login admin
+    // 🔹 segundo intento: admin
     res = await fetch(`${API_ADMIN}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -66,12 +60,12 @@ loginForm.addEventListener("submit", async (e) => {
 
     if (res.ok) {
       let data = await res.json();
-      loginMsg.textContent = "👑 Bienvenido admin";
+      loginMsg.textContent = "👑 Bienvenido administrador";
       console.log("Admin logueado:", data);
       return;
     }
 
-    loginMsg.textContent = "❌ Usuario o contraseña incorrectos";
+    loginMsg.textContent = "❌ Credenciales incorrectas";
 
   } catch (err) {
     console.error(err);
@@ -79,25 +73,19 @@ loginForm.addEventListener("submit", async (e) => {
   }
 });
 
-// ==============================
-//  REGISTRO
-// ==============================
+// ============================
+// REGISTRO
+// ============================
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const nombre = regUsername.value.trim(); // 🔥 nombre correcto
-  const email = regCorreo.value.trim();
-  const password = regPassword.value.trim();
-
-  if (!nombre || !email || !password) {
-    registerMsg.textContent = "⚠️ Completa todos los campos";
-    return;
-  }
+  const nombre = document.getElementById("reg-username").value.trim(); // 🔥 corregido
+  const email = document.getElementById("reg-correo").value.trim();
+  const password = document.getElementById("reg-password").value.trim();
 
   registerMsg.textContent = "⏳ Registrando...";
 
-  // 🔹 payload correcto que espera el backend
-  const payload = { nombre, email, password };
+  const payload = { nombre, email, password }; // 🔥 correcto
 
   try {
     const res = await fetch(`${API_USUARIOS}/registro`, {
@@ -109,7 +97,7 @@ registerForm.addEventListener("submit", async (e) => {
     const data = await res.json();
 
     if (!res.ok) {
-      registerMsg.textContent = "⚠ " + (data.error || "Error al registrar");
+      registerMsg.textContent = `⚠ ${data.error || "Error al registrar"}`;
       return;
     }
 

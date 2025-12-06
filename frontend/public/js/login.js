@@ -85,15 +85,17 @@ function validarPassword(pass) {
 
 
 // ===========================================================
-// LOGIN — Admin + Usuario (por NOMBRE)
+// LOGIN — Admin + Usuario
 // ===========================================================
+// LOGIN — Admin + Usuario
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const nombre = document.getElementById("login-username").value.trim();
+  const email = document.getElementById("login-correo").value.trim();
   const password = loginForm.querySelector('input[type="password"]').value.trim();
 
-  if (!nombre || !password) return showToast("Completa todos los campos", "warn");
+  if (!email || !password) return showToast("Completa todos los campos", "warn");
+  if (!validarCorreo(email)) return showToast("Correo inválido", "warn");
 
   try {
     // ADMIN LOGIN
@@ -101,7 +103,7 @@ loginForm.addEventListener("submit", async (e) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ nombre, password }),
+      body: JSON.stringify({ email, password }),
     });
 
     if (adminResp.ok) {
@@ -112,11 +114,11 @@ loginForm.addEventListener("submit", async (e) => {
       return setTimeout(() => (window.location.href = "admin.html"), 1200);
     }
 
-    // LOGIN USUARIO NORMAL
+    // USUARIO LOGIN
     const userResp = await fetch(`${API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre, password }),
+      body: JSON.stringify({ email, password }),
     });
 
     const data = await userResp.json();
@@ -133,6 +135,7 @@ loginForm.addEventListener("submit", async (e) => {
     showToast("No se pudo conectar al servidor", "error");
   }
 });
+
 
 
 // ===========================================================
@@ -157,6 +160,7 @@ registerForm.addEventListener("submit", async (e) => {
     });
 
     let data = {};
+
     try { data = await resp.json(); } catch {}
 
     if (!resp.ok) {
@@ -166,7 +170,7 @@ registerForm.addEventListener("submit", async (e) => {
       );
     }
 
-    showToast("Cuenta creada con éxito 🎉", "success");
+    showToast("Cuenta creada con éxito", "success");
     setTimeout(() => loginTab.click(), 600);
 
   } catch (error) {

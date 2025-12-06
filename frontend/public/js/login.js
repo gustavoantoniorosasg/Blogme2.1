@@ -91,7 +91,7 @@ function validarPassword(pass) {
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const email = document.getElementById("login-correo").value.trim();
+  const nombre = document.getElementById("login-username").value.trim();
   const password = loginForm.querySelector('input[type="password"]').value.trim();
 
   if (!email || !password) return showToast("Completa todos los campos", "warn");
@@ -103,7 +103,7 @@ loginForm.addEventListener("submit", async (e) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ nombre, password }),
     });
 
     if (adminResp.ok) {
@@ -153,7 +153,7 @@ registerForm.addEventListener("submit", async (e) => {
   if (!validarPassword(password)) return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
 
   try {
-    const resp = await fetch(`${API_USUARIOS}/login`, {
+    const resp = await fetch(`${API_USUARIOS}/registro`, {   // 🔥 CORREGIDO
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre, email, password })
@@ -170,7 +170,7 @@ registerForm.addEventListener("submit", async (e) => {
       );
     }
 
-    showToast("Cuenta creada con éxito", "success");
+    showToast("Cuenta creada con éxito 🎉", "success");
     setTimeout(() => loginTab.click(), 600);
 
   } catch (error) {

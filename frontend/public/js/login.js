@@ -90,7 +90,7 @@ function validarPassword(pass) {
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const nombre = document.getElementById("login-username").value.trim();
+  const email = document.getElementById("login-email").value.trim();
   const password = document.getElementById("login-password").value.trim();
 
   if (!nombre || !password)

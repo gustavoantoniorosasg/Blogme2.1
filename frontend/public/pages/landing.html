@@ -1,196 +1,101 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BlogMe | Inspírate</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogMe – Exprésate. Inspira. Conecta.</title>
+    <link rel="stylesheet" href="css/landing.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <script src="/config.js"></script>
+     <script src="/config.js"></script>
 
-  <!-- Tus estilos principales -->
-  <link rel="stylesheet" href="/styles/global.css">
-  <link rel="stylesheet" href="/styles/landing.css">
-  <link rel="stylesheet" href="/styles/subscriptions.css">
-
-  <meta name="description" content="BlogMe — Comparte ideas, conecta con lectores y crece como creador.">
 </head>
 <body>
+    <!-- ANIMATED BACKGROUND -->
+    <div class="bg-animated"></div>
 
-  <!-- Fondos Animados -->
-  <div class="bg-shape bg-lg parallax"></div>
-  <div class="bg-shape bg-md parallax"></div>
-  <div class="bg-shape bg-sm parallax"></div>
-
-  <!-- NAV ADAPTADO A TU CSS GLOBAL -->
-  <header class="topbar">
-    <div class="nav-left">
-      <a href="./landing.html" class="brand">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbIw4iUs2fTVfxEjDVSUwe1KouOv7kShjWMA&s"
-             alt="Logo BlogMe" class="logo-img">
-        <span class="brand-txt">Blog<span>Me</span></span>
-      </a>
-    </div>
-
-    <div class="nav-right">
-      <nav class="main-nav">
-        <a href="./landing.html" class="nav-link">Inicio</a>
-        <a href="./explorar.html" class="nav-link">Explorar</a>
-        <a href="./acerca.html" class="nav-link">Acerca</a>
-        <a href="./ayuda.html" class="nav-link">Ayuda</a>
-        <a href="./login.html" class="btn btn-nav">Iniciar sesión</a>
-      </nav>
-    </div>
-  </header>
-
-  <!-- MAIN -->
-  <main class="container" style="margin-top: 60px;">
-
-    <!-- HERO ADAPTADO -->
-    <section class="row" style="margin-bottom: 3rem; align-items:center;">
-      <div class="col-left">
-        <h1 class="title-xl" style="margin-bottom:1rem;">Exprésate. Inspira. Conecta.</h1>
-
-        <p style="margin-bottom:1.5rem;">
-          BlogMe es el lugar para compartir ideas, historias y creatividad. Diseño limpio y comunidad real — únete hoy y haz que tu voz llegue más lejos.
-        </p>
-
-        <div style="display:flex; gap:1rem; margin-bottom:1.5rem;">
-          <a href="./login.html" class="btn">Comienza ahora</a>
-          <a href="./publicaciones.html" class="btn alt">Ver publicaciones</a>
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <div class="nav-left">
+            <img src="assets/logo.png" class="logo">
+            <span class="logo-text">BlogMe</span>
         </div>
 
-        <ul class="post-meta">
-          <li><strong>Publica fácilmente</strong> — editor simple y potente.</li>
-          <li><strong>Conéctate</strong> — comentarios y reacciones.</li>
-          <li><strong>Crece</strong> — estadísticas y herramientas Premium.</li>
-        </ul>
-      </div>
+        <button id="toggle-dark" class="toggle-dark">
+           <i class="fa-solid fa-moon"></i>
+        </button>
+        <script>
+document.getElementById("toggle-dark").addEventListener("click", () => {
+    document.body.classList.toggle("dark-mode");
 
-      <aside class="col-right">
-        <div class="row" style="gap:1rem;">
-          <article class="post-card">
-            <img src="https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg" alt="">
-            <div class="post-content">
-              <h3>Sofía Ramírez</h3>
-              <p>Cómo encontré la inspiración para escribir todos los días.</p>
-            </div>
-          </article>
+    const icon = document.querySelector("#toggle-dark i");
+    if (document.body.classList.contains("dark-mode")) {
+        icon.classList.replace("fa-moon", "fa-sun");
+    } else {
+        icon.classList.replace("fa-sun", "fa-moon");
+    }
+});
+</script>
 
-          <article class="post-card">
-            <img src="https://cdn.shortpixel.ai/spai/q_lossless+w_998+to_auto+ret_img/independent-photo.com/wp-content/uploads/2022/03/Karen-Pape-1800x1200.jpeg" alt="">
-            <div class="post-content">
-              <h3>Carlos Méndez</h3>
-              <p>5 trucos para ser más productivo sin estrés.</p>
-            </div>
-          </article>
+        <nav class="nav-links">
+            <a href="#">Inicio</a>
+            <a href="#">Explorar</a>
+            <a href="#">Acerca</a>
+            <a href="login.html" class="btn-login">Iniciar sesión</a>
+        </nav>
+    </header>
 
-          <article class="post-card">
-            <img src="https://marketplace.canva.com/MADaqpevv8c/1/thumbnail_large-1/canva-mountain-landscape-MADaqpevv8c.jpg" alt="">
-            <div class="post-content">
-              <h3>Lucía Pérez</h3>
-              <p>Fotografía urbana: capturando la luz perfecta.</p>
+    <div class="bg-icons">
+    <i class="fa-solid fa-pencil icon i1"></i>
+    <i class="fa-solid fa-camera icon i2"></i>
+    <i class="fa-solid fa-microphone icon i3"></i>
+    <i class="fa-solid fa-book icon i4"></i>
+    <i class="fa-solid fa-comments icon i5"></i>
+    <i class="fa-solid fa-star icon i6"></i>
+    <i class="fa-solid fa-heart icon i7"></i>
+    </div>
+
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="hero-text">
+            <h1>Exprésate.<br>Inspira.<br>Conecta.</h1>
+            <p>BlogMe es el lugar donde tus ideas toman vida. Comparte, crea y conecta con una comunidad real.</p>
+
+            <div class="hero-btns">
+                <a href="#" class="btn-primary">Comienza ahora</a>
+                <a href="#" class="btn-secondary">Ver ejemplos</a>
             </div>
-          </article>
         </div>
-      </aside>
+
+        <!-- SAMPLE CARDS -->
+        <div class="card-area">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470" alt="">
+                <div class="card-content">
+                    <h3>Sofía Ramírez</h3>
+                    <p>Cómo encontré inspiración para escribir todos los días.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee" alt="">
+                <div class="card-content">
+                    <h3>Carlos Méndez</h3>
+                    <p>5 trucos para ser más productivo sin estrés.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429" alt="">
+                <div class="card-content">
+                    <h3>Lucía Pérez</h3>
+                    <p>Fotografía urbana: capturando la luz perfecta.</p>
+                </div>
+            </div>
+        </div>
     </section>
-
-    <!-- SUSCRIPCIONES (REESTRUCTURADAS A TU SISTEMA VISUAL) -->
-    <section style="margin-bottom:4rem;">
-      <h2 class="title-lg">Elige tu suscripción</h2>
-      <p style="margin-bottom:2rem;">Planes pensados para cada tipo de usuario.</p>
-
-      <div class="row" style="gap:1rem;">
-        <article class="post-card col-left">
-          <h3>Básico</h3>
-          <p class="title-md">$5 <small>/ mes</small></p>
-          <ul>
-            <li>Acceso a publicaciones públicas</li>
-            <li>Comentar y reaccionar</li>
-            <li>1 publicación destacada por mes</li>
-          </ul>
-          <button class="btn" data-sub-plan="Basico">Suscribirse</button>
-        </article>
-
-        <article class="post-card highlighted col-center">
-          <span class="categoria-chip">Recomendado</span>
-          <h3>Premium</h3>
-          <p class="title-md">$15 <small>/ mes</small></p>
-          <ul>
-            <li>Todo lo del plan Básico</li>
-            <li>Publicaciones ilimitadas</li>
-            <li>Acceso a estadísticas</li>
-            <li>Soporte prioritario</li>
-          </ul>
-          <button class="btn" data-sub-plan="Premium">Suscribirse</button>
-        </article>
-
-        <article class="post-card col-right">
-          <h3>Pro</h3>
-          <p class="title-md">$25 <small>/ mes</small></p>
-          <ul>
-            <li>Todo lo del plan Premium</li>
-            <li>Promoción en página principal</li>
-            <li>Recursos exclusivos</li>
-            <li>Eventos BlogMe</li>
-          </ul>
-          <button class="btn" data-sub-plan="Pro">Suscribirse</button>
-        </article>
-      </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="container glass" style="text-align:center; padding:2rem; margin-bottom:4rem;">
-      <h2 class="title-lg">¿Listo para empezar?</h2>
-      <p>Únete a miles de creadores que comparten sus ideas en BlogMe.</p>
-      <a href="./login.html" class="btn" style="margin-top:1rem;">Crear cuenta</a>
-    </section>
-
-  </main>
-
-  <!-- FOOTER ADAPTADO -->
-  <footer class="site-footer">
-    <div class="container" style="display:flex; justify-content:space-between; align-items:center;">
-      <small>© 2025 BlogMe — Todos los derechos reservados</small>
-      <div style="display:flex; gap:1rem;">
-        <a href="./acerca.html">Acerca</a>
-        <a href="./ayuda.html">Ayuda</a>
-        <a href="./politica.html">Política y términos</a>
-      </div>
-    </div>
-  </footer>
-
-  <!-- MODAL SUSCRIPCIÓN ORIGINAL (solo adapté clases visuales) -->
-  <div id="subscriptionModal" class="modal-overlay">
-    <div class="modal-content glass">
-      <button class="close-modal">&times;</button>
-      <h2>Completa tu suscripción</h2>
-      <form id="subscriptionForm" class="subscription-form">
-        <label>Nombre completo</label>
-        <input id="name" type="text" required>
-
-        <label>Plan elegido</label>
-        <select id="plan">
-          <option value="Basico">Básico — $5 / mes</option>
-          <option value="Premium">Premium — $15 / mes</option>
-          <option value="Pro">Pro — $25 / mes</option>
-        </select>
-
-        <label>Método de pago</label>
-        <select id="payment">
-          <option value="tarjeta">Tarjeta</option>
-          <option value="paypal">PayPal</option>
-          <option value="transferencia">Transferencia</option>
-        </select>
-
-        <button type="submit" class="btn">Confirmar suscripción</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Scripts -->
-  <script src="../js/main.js" defer></script>
-  <script src="../js/subscriptions.js" defer></script>
 
 </body>
 </html>

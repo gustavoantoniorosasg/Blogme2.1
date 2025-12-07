@@ -1,3 +1,5 @@
+fetch(`${API_USUARIOS}/ping`).catch(() => {});
+
 console.log("🌍 API apuntando a:", API_USUARIOS);
 
 // ===========================================================

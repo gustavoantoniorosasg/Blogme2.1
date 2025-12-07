@@ -2,6 +2,12 @@
    🌐 CONFIG GLOBAL DE BLOGME
    Funciona en Vercel (frontend) + Render (backend)
 =========================================================== */
+export const API = "https://blogme2-1.onrender.com/api";
+
+export const API_USUARIOS = `${API}/usuarios`;
+
+// ---- DESPIERTA RENDER ----
+fetch(`${API_USUARIOS}/ping`).catch(() => {});
 
 // Detecta si frontend está online (Vercel)
 const IS_VERCEL = window.location.hostname.includes("vercel.app");

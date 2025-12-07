@@ -89,7 +89,7 @@ app.get("/", (req, res) =>
   res.send("🚀 API BlogMe funcionando correctamente")
 );
 
-app.use("/api/usuarios", usuarios);
+app.use("/api/usuarios", require("./routes/usuarios"));
 app.use("/api/admin", adminRoutes);
 app.use("/api/publicaciones", publicacionesRoutes);
 

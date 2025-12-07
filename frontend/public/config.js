@@ -23,7 +23,7 @@ window.API_PUBLICACIONES = `${window.API_BASE_URL}/api/publicaciones`;
 // Despertar backend en Render
 window.wakeBackend = async function () {
   try {
-    await fetch(`${window.API_BASE_URL}/api/ping`, { method: "GET" });
+    await fetch(`${window.API_BASE_URL}/api/usuarios/ping`, { method: "GET" });
   } catch {}
 };
 

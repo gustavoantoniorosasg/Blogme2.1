@@ -150,14 +150,14 @@ body {
   opacity: 0.35;
 }
 
-
-/* === GLASSMORPHISM MEJORADO === */
-header.nav, .card, .cta, .nav-links {
+/* === GLASSMORPHISM MEJORADO — corregido === */
+header.nav, .card, .cta {
   background: rgba(255,255,255,0.12);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255,255,255,0.22);
 }
+
 
 
 /* === CARDS MEJORADAS CON HOVER NEÓN === */

@@ -52,7 +52,7 @@ header.nav {
 }
 .card img { width:100%; height:140px; object-fit:cover; display:block; }
 .card h4 { margin:12px 14px 6px; color:#083049; font-weight:700; }
-.card p { margin:0 14px 12px; font-size:0.95rem; color:#4b748f; }
+.card p { margin:0 14px 12px; font-size:0.95rem; color:#2a2c2e; }
 
 /* hover */
 .card:hover { transform: translateY(-10px); box-shadow: 0 28px 60px rgba(52,126,191,0.22); }
@@ -171,8 +171,8 @@ header.nav, .card, .cta {
 
 .card:hover {
   transform: translateY(-12px) scale(1.03);
-  border-color: #ff1fb0;
-  box-shadow: 0 0 16px #ff1fb0aa, 0 0 24px #ff1fb088;
+  border-color: #ffffff;
+  box-shadow: 0 0 16px #ffffffaa, 0 0 24px #ffffff88;
 }
 
 

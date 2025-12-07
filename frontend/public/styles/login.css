@@ -1,3 +1,6 @@
+/* -------------------------- */
+/* RESETEO GENERAL            */
+/* -------------------------- */
 * {
   margin: 0;
   padding: 0;
@@ -13,92 +16,139 @@ body {
   justify-content: center;
 }
 
-/* Fondo animado azul */
+/* -------------------------- */
+/* FONDO ANIMADO ROSA–AZUL    */
+/* -------------------------- */
 .animated-bg {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 20% 20%, #002b6b, #00132e);
+  background: radial-gradient(circle at 30% 30%, #ff63b6, #4b008a 70%);
   overflow: hidden;
-  z-index: -1;
+  z-index: -2;
 }
 
-.animated-bg::before, .animated-bg::after {
+.animated-bg::before, 
+.animated-bg::after {
   content: '';
   position: absolute;
   width: 200%;
   height: 200%;
   top: -50%;
   left: -50%;
-  background: radial-gradient(circle, rgba(0,123,255,0.2), transparent 70%);
-  animation: move 20s linear infinite;
+  background: radial-gradient(circle, rgba(255,120,200,0.25), transparent 70%);
+  animation: swirl 24s linear infinite;
 }
 
 .animated-bg::after {
-  background: radial-gradient(circle, rgba(0,204,255,0.15), transparent 70%);
+  background: radial-gradient(circle, rgba(80,150,255,0.20), transparent 75%);
   animation-direction: reverse;
 }
 
-@keyframes move {
-  0% { transform: rotate(0deg) translateX(0); }
-  50% { transform: rotate(180deg) translateX(10%); }
-  100% { transform: rotate(360deg) translateX(0); }
+@keyframes swirl {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
 }
 
-/* Tarjeta */
+/* -------------------------- */
+/* ICONOS FLOTANTES           */
+/* -------------------------- */
+
+.floating-icons {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.icon {
+  position: absolute;
+  font-size: 35px;
+  opacity: 0.55;
+  color: #fff;
+  text-shadow: 0 0 12px rgba(255,100,200,0.9);
+  animation: floatIcon 12s infinite ease-in-out;
+}
+
+.icon:nth-child(1) { top: 10%; left: 15%; animation-duration: 17s; }
+.icon:nth-child(2) { top: 60%; left: 5%; animation-duration: 20s; }
+.icon:nth-child(3) { top: 30%; right: 10%; animation-duration: 15s; }
+.icon:nth-child(4) { top: 75%; right: 18%; animation-duration: 19s; }
+
+@keyframes floatIcon {
+  0% { transform: translateY(0) translateX(0) scale(1); opacity: 0.5; }
+  50% { transform: translateY(-35px) translateX(20px) scale(1.15); opacity: 0.85; }
+  100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.5; }
+}
+
+/* -------------------------- */
+/* TARJETA LOGIN              */
+/* -------------------------- */
 .login-container {
-  width: 350px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  backdrop-filter: blur(15px);
+  width: 360px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 25px;
   padding: 40px;
   text-align: center;
-  box-shadow: 0 0 30px rgba(0, 102, 255, 0.2);
-  transition: all 0.4s ease;
+
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 0 40px rgba(255, 120, 220, 0.25);
+
+  border: 1px solid rgba(255, 255, 255, 0.25);
+
+  transition: transform .4s ease, box-shadow .4s ease;
 }
 
 .login-container:hover {
-  box-shadow: 0 0 40px rgba(0, 170, 255, 0.35);
-  transform: translateY(-5px);
+  transform: translateY(-6px);
+  box-shadow: 0 0 55px rgba(255, 140, 230, 0.45);
 }
 
 .title {
-  color: white;
+  color: #fff;
   font-size: 2.2em;
-  margin-bottom: 20px;
-  letter-spacing: 1px;
+  font-weight: 600;
+  margin-bottom: 18px;
 }
 .title span {
-  color: #00aaff;
+  color: #ff9be0;
 }
 
-/* Tabs */
+/* -------------------------- */
+/* TABS                       */
+/* -------------------------- */
 .tabs {
   display: flex;
   justify-content: center;
-  margin-bottom: 15px;
+  margin-bottom: 18px;
 }
 
 .tab {
   flex: 1;
   background: transparent;
   border: none;
-  color: white;
-  padding: 10px;
-  font-size: 1em;
+  color: rgba(255,255,255,0.8);
+  padding: 10px 0;
   cursor: pointer;
-  transition: all 0.3s ease;
   border-bottom: 2px solid transparent;
+
+  transition: all 0.3s ease;
+
+  font-size: 1em;
 }
 
 .tab.active {
-  border-bottom: 2px solid #00aaff;
-  color: #00cfff;
+  border-bottom: 2px solid #ff86d9;
+  color: #ffb5f0;
 }
 
-/* Formulario */
+/* -------------------------- */
+/* FORMULARIO                 */
+/* -------------------------- */
 .form {
   display: none;
   flex-direction: column;
@@ -111,44 +161,62 @@ body {
 
 .form input {
   margin: 10px 0;
-  padding: 10px;
-  border-radius: 10px;
+  padding: 12px;
+  border-radius: 12px;
   border: none;
   outline: none;
-  background: rgba(255, 255, 255, 0.2);
+
+  background: rgba(255,255,255,0.25);
   color: white;
   font-size: 0.95em;
+
+  box-shadow: inset 0 0 10px rgba(255,255,255,0.15);
 }
 
 .form input::placeholder {
   color: rgba(255,255,255,0.7);
 }
 
+/* BOTÓN */
 .btn {
-  margin-top: 10px;
-  background: linear-gradient(45deg, #007bff, #00cfff);
+  margin-top: 12px;
+  background: linear-gradient(45deg, #ff4cc7, #7da8ff);
   border: none;
-  border-radius: 10px;
-  padding: 10px;
+  border-radius: 12px;
+  padding: 12px;
   color: white;
   font-weight: bold;
+
   cursor: pointer;
   transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 15px #00aaff;
+  box-shadow: 0 0 18px rgba(255,120,220,0.8);
 }
 
+/* LINK */
 .link {
   margin-top: 10px;
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.75);
   cursor: pointer;
   font-size: 0.9em;
 }
 
+/* ANIMACIÓN */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.switch-register span {
+  color: #ff69b4;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.switch-register span:hover {
+  text-shadow: 0 0 8px rgba(255, 105, 180, 0.8);
 }

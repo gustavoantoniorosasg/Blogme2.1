@@ -14,6 +14,14 @@
 <body>
   <div class="animated-bg"></div>
 
+<div class="floating-icons">
+  <div class="icon">🎤</div> <!-- Micrófono -->
+  <div class="icon">✏️</div> <!-- Lápiz -->
+  <div class="icon">📷</div> <!-- Cámara -->
+  <div class="icon">❤️</div> <!-- Corazón -->
+</div>
+
+
   <div class="login-container">
     <h1 class="title">Blog<span>Me</span></h1>
 
@@ -27,6 +35,7 @@
       <input id="login-correo" type="email" placeholder="Correo electrónico" required autocomplete="email">
       <input id="login-password" type="password" placeholder="Contraseña" required autocomplete="current-password">
       <button type="submit" class="btn">Entrar</button>
+      <p class="link switch-register">¿No tienes una cuenta? <span>Regístrate</span></p>
       <p class="link">¿Olvidaste tu contraseña?</p>
       <p id="login-msg" class="msg"></p>
     </form>
@@ -42,7 +51,7 @@
   </div>
 
   <!-- Scripts en orden correcto -->
-  <script src="/js/login.js"></script>
+  <script src="/js/login.js" defer></script>
   
 
 </body>

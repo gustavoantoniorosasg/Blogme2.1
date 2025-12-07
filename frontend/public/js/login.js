@@ -1,9 +1,12 @@
+// ===========================================================
+// 🌐 Comprobación de API
+// ===========================================================
 fetch(`${API_USUARIOS}/ping`).catch(() => {});
-
 console.log("🌍 API apuntando a:", API_USUARIOS);
 
+
 // ===========================================================
-// 🔔 TOAST SYSTEM
+// 🔔 SISTEMA DE TOAST
 // ===========================================================
 function showToast(msg, type = "info") {
   let toast = document.getElementById("toast");
@@ -22,7 +25,6 @@ function showToast(msg, type = "info") {
   }, 2500);
 }
 
-// Toast visuals
 const toastStyle = document.createElement("style");
 toastStyle.innerHTML = `
 #toast {
@@ -51,130 +53,147 @@ document.head.appendChild(toastStyle);
 
 
 // ===========================================================
-// 🔄 CAMBIO LOGIN / REGISTRO
+// ⏳ Esperar a que cargue el DOM antes de asignar listeners
 // ===========================================================
-const loginTab = document.getElementById("login-tab");
-const registerTab = document.getElementById("register-tab");
-const loginForm = document.getElementById("login-form");
-const registerForm = document.getElementById("register-form");
+document.addEventListener("DOMContentLoaded", () => {
 
-loginTab.addEventListener("click", () => {
-  loginTab.classList.add("active");
-  registerTab.classList.remove("active");
-  loginForm.classList.add("active");
-  registerForm.classList.remove("active");
-});
+  // -----------------------------------------
+  // 🔄 CAMBIO LOGIN / REGISTRO
+  // -----------------------------------------
+  const loginTab = document.getElementById("login-tab");
+  const registerTab = document.getElementById("register-tab");
+  const loginForm = document.getElementById("login-form");
+  const registerForm = document.getElementById("register-form");
 
-registerTab.addEventListener("click", () => {
-  registerTab.classList.add("active");
-  loginTab.classList.remove("active");
-  registerForm.classList.add("active");
-  loginForm.classList.remove("active");
-});
-
-
-// ===========================================================
-// ✨ VALIDACIONES
-// ===========================================================
-function validarPassword(pass) {
-  return pass.length >= 6;
-}
-
-
-// ===========================================================
-// 🔐 LOGIN — Intento Admin → Luego Usuario normal
-// ===========================================================
-loginForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const email = document.getElementById("login-correo").value.trim();
-  const password = document.getElementById("login-password").value.trim();
-
-  if (!email || !password)
-    return showToast("Completa todos los campos", "warn");
-
-  if (!validarPassword(password))
-    return showToast("Contraseña inválida", "warn");
-
-  try {
-    // 1️⃣ Intentar Login como ADMIN
-    const adminResp = await fetch(`${API_ADMIN}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email, password }),
+  if (loginTab && registerTab && loginForm && registerForm) {
+    
+    loginTab.addEventListener("click", () => {
+      loginTab.classList.add("active");
+      registerTab.classList.remove("active");
+      loginForm.classList.add("active");
+      registerForm.classList.remove("active");
     });
 
-    if (adminResp.ok) {
-      const data = await adminResp.json();
-      localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
-      localStorage.setItem("adminSession", "true");
-      showToast(`Bienvenido administrador`, "success");
+    registerTab.addEventListener("click", () => {
+      registerTab.classList.add("active");
+      loginTab.classList.remove("active");
+      registerForm.classList.add("active");
+      loginForm.classList.remove("active");
+    });
+  }
 
-      return setTimeout(() => (window.location.href = "/admin-panel.html"), 800);
+  // ===========================================================
+  // 🛡 VALIDACIONES
+  // ===========================================================
+  function validarPassword(pass) {
+    return pass.length >= 6;
+  }
+
+  // ===========================================================
+  // 🔐 LOGIN: ADMIN → LUEGO USUARIO NORMAL
+  // ===========================================================
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("login-correo").value.trim();
+    const password = document.getElementById("login-password").value.trim();
+
+    if (!email || !password) return showToast("Completa todos los campos", "warn");
+    if (!validarPassword(password)) return showToast("Contraseña inválida", "warn");
+
+    try {
+      // 1️⃣ Intentar Login como ADMIN
+      const adminResp = await fetch(`${API_ADMIN}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (adminResp.ok) {
+        const data = await adminResp.json();
+        localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
+        localStorage.setItem("adminSession", "true");
+        showToast(`Bienvenido administrador`, "success");
+
+        return setTimeout(() => (window.location.href = "/admin-panel.html"), 800);
+      }
+
+      // 2️⃣ Intentar login como usuario normal
+      const respUser = await fetch(`${API_USUARIOS}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await respUser.json();
+
+      if (!respUser.ok)
+        return showToast(data.error || "Credenciales incorrectas", "error");
+
+      localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
+      localStorage.removeItem("adminSession");
+
+      showToast(`Bienvenido ${data.usuario.nombre}`, "success");
+      setTimeout(() => (window.location.href = "/publicaciones.html"), 700);
+
+    } catch (error) {
+      console.error(error);
+      showToast("No se pudo conectar con el servidor", "error");
+    }
+  });
+
+
+  // ===========================================================
+  // 📝 REGISTRO USUARIOS
+  // ===========================================================
+  registerForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const nombre = document.getElementById("reg-username").value.trim();
+    const email = document.getElementById("reg-correo").value.trim();
+    const password = document.getElementById("reg-password").value.trim();
+
+    if (!nombre || !email || !password)
+      return showToast("Completa todos los campos", "warn");
+
+    if (!validarPassword(password))
+      return showToast("La contraseña debe tener 6+ caracteres", "warn");
+
+    try {
+      const resp = await fetch(`${API_USUARIOS}/registro`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ nombre, email, password }),
+      });
+
+      let data = {};
+      try { data = await resp.json(); } catch {}
+
+      if (!resp.ok)
+        return showToast(data.msg || data.error || "Error al registrarse", "error");
+
+      showToast("Cuenta creada con éxito 🎉", "success");
+
+      // Cambiar automáticamente al formulario de login
+      setTimeout(() => loginTab.click(), 600);
+
+    } catch (error) {
+      console.error(error);
+      showToast("Error al conectar con el servidor", "error");
     }
 
-    // 2️⃣ Intentar login como usuario normal
-    const respUser = await fetch(`${API_USUARIOS}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email, password }),
-    });
+    // Cambiar a formulario de registro desde el texto
+document.querySelector(".switch-register").addEventListener("click", () => {
+  loginForm.classList.remove("active");
+  registerForm.classList.add("active");
 
-    const data = await respUser.json();
-
-    if (!respUser.ok)
-      return showToast(data.error || "Credenciales incorrectas", "error");
-
-    localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
-    localStorage.removeItem("adminSession");
-
-    showToast(`Bienvenido ${data.usuario.nombre}`, "success");
-    setTimeout(() => (window.location.href = "/publicaciones.html"), 700);
-
-  } catch (error) {
-    console.error(error);
-    showToast("No se pudo conectar con el servidor", "error");
-  }
+  loginTab?.classList.remove("active");
+  registerTab?.classList.add("active");
 });
 
+  });
 
-// ===========================================================
-// 📝 REGISTRO USUARIOS
-// ===========================================================
-registerForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const nombre = document.getElementById("reg-username").value.trim();
-  const email = document.getElementById("reg-correo").value.trim();
-  const password = document.getElementById("reg-password").value.trim();
-
-  if (!nombre || !email || !password)
-    return showToast("Completa todos los campos", "warn");
-
-  if (!validarPassword(password))
-    return showToast("La contraseña debe tener 6+ caracteres", "warn");
-
-  try {
-    const resp = await fetch(`${API_USUARIOS}/registro`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ nombre, email, password }),
-    });
-
-    let data = {};
-    try { data = await resp.json(); } catch {}
-
-    if (!resp.ok)
-      return showToast(data.msg || data.error || "Error al registrarse", "error");
-
-    showToast("Cuenta creada con éxito 🎉", "success");
-    setTimeout(() => loginTab.click(), 600);
-
-  } catch (error) {
-    console.error(error);
-    showToast("Error al conectar con el servidor", "error");
-  }
-});
+}); // FIN DOMContentLoaded

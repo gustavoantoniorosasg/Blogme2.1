@@ -255,3 +255,10 @@ header.nav, .card, .cta, .nav-links {
   box-shadow: 0 0 14px white;
   border-color: white;
 }
+
+/* Quitar fondo y borde del contenedor de los botones */
+.nav-links {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}

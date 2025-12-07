@@ -220,3 +220,38 @@ header.nav, .card, .cta, .nav-links {
   color: white;
   opacity: 0.9;
 }
+
+/* === NAV LINKS — estilo transparente con borde luminoso === */
+
+.nav-links {
+  display: flex;
+  gap: 18px;
+  margin-left: auto; /* empuja hacia la derecha */
+}
+
+.nav-links a {
+  padding: 8px 16px;
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.85);
+  transition: all .25s ease;
+}
+
+/* Efecto luminoso al hover */
+.nav-links a:hover {
+  border-color: rgba(255,255,255,0.9);
+  box-shadow: 0 0 12px rgba(255,255,255,0.65);
+  color: white;
+}
+
+/* El botón de Iniciar sesión lo hago más destacado */
+.nav-cta {
+  border-color: rgba(255,255,255,0.45);
+  font-weight: 600;
+}
+
+.nav-cta:hover {
+  box-shadow: 0 0 14px white;
+  border-color: white;
+}

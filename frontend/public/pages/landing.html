@@ -93,52 +93,7 @@
         </div>
       </aside>
     </section>
-
-    <!-- Suscripciones (enlazadas con subscriptions.js via data-sub-plan) -->
-    <section class="subscriptions container-centered" id="suscripciones" aria-labelledby="titulo-suscripciones">
-      <h2 id="titulo-suscripciones">Elige tu suscripción</h2>
-      <p class="subtitle">Planes pensados para cada tipo de usuario. Más privilegios, más creatividad.</p>
-
-      <div class="subscription-cards">
-        <article class="sub-card">
-          <h3>Básico</h3>
-          <p class="price">$5 <small>/ mes</small></p>
-          <ul>
-            <li>Acceso a publicaciones públicas</li>
-            <li>Comentar y reaccionar</li>
-            <li>1 publicación destacada por mes</li>
-          </ul>
-          <!-- data-sub-plan enlazado con subscriptions.js -->
-          <button class="btn-primary" data-sub-plan="Basico">Suscribirse</button>
-        </article>
-
-        <article class="sub-card highlighted">
-          <div class="badge">Recomendado</div>
-          <h3>Premium</h3>
-          <p class="price">$15 <small>/ mes</small></p>
-          <ul>
-            <li>Todo lo del plan Básico</li>
-            <li>Publicaciones ilimitadas</li>
-            <li>Acceso a estadísticas de tus posts</li>
-            <li>Soporte prioritario</li>
-          </ul>
-          <button class="btn-primary" data-sub-plan="Premium">Suscribirse</button>
-        </article>
-
-        <article class="sub-card">
-          <h3>Pro</h3>
-          <p class="price">$25 <small>/ mes</small></p>
-          <ul>
-            <li>Todo lo del plan Premium</li>
-            <li>Promoción de publicaciones en la página principal</li>
-            <li>Acceso a recursos exclusivos</li>
-            <li>Invitaciones a eventos BlogMe</li>
-          </ul>
-          <button class="btn-primary" data-sub-plan="Pro">Suscribirse</button>
-        </article>
-      </div>
-    </section>
-
+    
     <!-- CTA final -->
     <section class="cta container-centered" id="cta">
       <h2>¿Listo para empezar?</h2>
@@ -161,35 +116,22 @@
     </div>
   </footer>
 
-  <!-- MODAL SUSCRIPCION -->
-  <div id="subscriptionModal" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-content">
-      <button class="close-modal" aria-label="Cerrar">&times;</button>
-      <h2>Completa tu suscripción</h2>
-      <p>Selecciona tu método de pago y confirma tu plan.</p>
+  <!-- Íconos flotantes fondo -->
+<div class="floating-icon icon-1">
+  <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4zm2 4h12v2H6zm-2 4h16v2H4zm2 4h12v2H6z"/></svg>
+</div>
 
-      <form id="subscriptionForm" class="subscription-form" novalidate>
-        <label for="name">Nombre completo</label>
-        <input type="text" id="name" name="name" placeholder="Tu nombre" required>
+<div class="floating-icon icon-2">
+  <svg viewBox="0 0 24 24"><path d="M4 22V2h10l6 6v14z"/></svg>
+</div>
 
-        <label for="plan">Plan elegido</label>
-        <select id="plan" name="plan">
-          <option value="Basico">Básico — $5 / mes</option>
-          <option value="Premium">Premium — $15 / mes</option>
-          <option value="Pro">Pro — $25 / mes</option>
-        </select>
+<div class="floating-icon icon-3">
+  <svg viewBox="0 0 24 24"><path d="M3 5l9 6 9-6v2l-9 6-9-6z"/></svg>
+</div>
 
-        <label for="payment">Método de pago</label>
-        <select id="payment" name="payment">
-          <option value="tarjeta">Tarjeta de crédito / débito</option>
-          <option value="paypal">PayPal</option>
-          <option value="transferencia">Transferencia bancaria</option>
-        </select>
-
-        <button type="submit" class="btn-primary submit">Confirmar suscripción</button>
-      </form>
-    </div>
-  </div>
+<div class="floating-icon icon-4">
+  <svg viewBox="0 0 24 24"><path d="M4 4h16v12H5.17L4 17.17V4z"/></svg>
+</div>
 
   <!-- Scripts -->
 <script src="../js/main.js" defer></script>

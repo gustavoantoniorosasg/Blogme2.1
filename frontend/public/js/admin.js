@@ -1,177 +1,124 @@
-/* =========================================================================
-   🛡️ BLOGME — PANEL ADMIN PRO
-   Limpio • Seguro • Compatible con config.js global
-=========================================================================== */
-
-/* =========================================================================
-   🔐 PROTECCIÓN DE ACCESO
-=========================================================================== */
+// 🚨 Protección de acceso
 if (!localStorage.getItem("adminSession")) {
   alert("Acceso denegado. Inicia sesión como administrador.");
   window.location.href = "login.html";
 }
 
-/* =========================================================================
-   🚪 CERRAR SESIÓN GLOBAL (usa logout() de config.js)
-=========================================================================== */
+// 🔘 Cerrar sesión
 document.getElementById("logout-btn").addEventListener("click", () => {
-  logout();
+  localStorage.removeItem("adminSession");
+  window.location.href = "login.html";
 });
 
-/* =========================================================================
-   🌐 API GLOBAL (tomado desde config.js)
-=========================================================================== */
-const API_URL = `${API_ADMIN}`; // api/admin
-const API_POSTS = `${API_PUBLICACIONES}`; // api/publicaciones
+// 🌐 URL base del backend
+const API_URL = "http://localhost:4000/api/admin";
 
+// 🧍‍♀ Tablas
 const userTable = document.querySelector("#usersTable tbody");
 const postTable = document.querySelector("#postsTable tbody");
 
-/* =========================================================================
-   📦 MODALES
-=========================================================================== */
+// 👁 Modal de ver publicación
 const modal = document.getElementById("viewModal");
 const modalTitle = document.getElementById("modalTitle");
 const modalContent = document.getElementById("modalContent");
 const closeModal = document.getElementById("closeModal");
 
-const confirmModal = document.getElementById("confirmModal");
-const confirmText = document.getElementById("confirmText");
-const confirmCancel = document.getElementById("confirmCancel");
-const confirmOk = document.getElementById("confirmOk");
-
-let confirmResolve;
-
-const successModal = document.getElementById("successModal");
-const successText = document.getElementById("successText");
-const successOk = document.getElementById("successOk");
-
-const loader = document.getElementById("loader");
-
-/* =========================================================================
-   🔄 LOADER
-=========================================================================== */
-function mostrarLoader() { loader.style.display = "flex"; }
-function ocultarLoader() { loader.style.display = "none"; }
-
-/* =========================================================================
-   📥 CARGAR USUARIOS + PUBLICACIONES
-=========================================================================== */
+/* ============================================================
+   📦 Cargar datos reales desde MongoDB
+============================================================ */
 async function cargarDatos() {
   try {
-    mostrarLoader();
-
-    /* --- 👥 USUARIOS --- */
-    const resUsuarios = await fetch(`${API_URL}/lista`);
+    // 👥 Obtener usuarios
+    const resUsuarios = await fetch(`${API_URL}/usuarios`);
     if (!resUsuarios.ok) throw new Error("Error al obtener usuarios");
-
     const usuarios = await resUsuarios.json();
-    userTable.innerHTML = "";
 
+    userTable.innerHTML = "";
     usuarios.forEach(u => {
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>${u.username}</td>
-        <td>${u.correo || "Sin correo"}</td>
+        <td>${u.correo || u.email || "Sin correo"}</td>
         <td>${u.rol || "usuario"}</td>
         <td>
-          <button class="delete-btn" data-id="${u._id}" data-type="user">
-            🗑 Eliminar
-          </button>
+          <button class="delete-btn" data-id="${u._id}" data-type="user">🗑 Eliminar</button>
         </td>
       `;
       userTable.appendChild(row);
     });
 
-    /* --- 📰 PUBLICACIONES --- */
-    const resPosts = await fetch(`${API_POSTS}/lista`);
+    // 📰 Obtener publicaciones
+    const resPosts = await fetch(`${API_URL}/publicaciones`);
     if (!resPosts.ok) throw new Error("Error al obtener publicaciones");
-
     const posts = await resPosts.json();
-    postTable.innerHTML = "";
 
+    postTable.innerHTML = "";
     posts.forEach(p => {
       const autor = p.author || "Usuario eliminado";
-      const avatar = p.authorAvatar || "assets/img/default-avatar.png";
-      const textoCorto = p.content.length > 40
-        ? p.content.substring(0, 40) + "..."
-        : p.content;
+      const avatar = p.authorAvatar || "../img/default-avatar.png";
+      const textoCorto = p.content.length > 40 ? p.content.substring(0, 40) + "..." : p.content;
 
-      const row = document.createElement("tr");
-      row.innerHTML = `
+      const rowHTML = `
         <td>${textoCorto}</td>
         <td>
           <div class="post-author">
-            <img src="${avatar}" class="avatar-mini">
+            <img src="${avatar}" alt="avatar" class="avatar-mini">
             <span>${autor}</span>
           </div>
         </td>
         <td>
-          <button class="view-btn"
+          <button class="view-btn" 
             data-texto="${p.content}"
             data-imagen="${p.img || ""}"
             data-autor="${autor}">
             👁 Ver
           </button>
-
-          <button class="delete-btn"
-            data-id="${p._id}"
-            data-type="post">
-            🗑 Eliminar
-          </button>
+          <button class="delete-btn" data-id="${p._id}" data-type="post">🗑 Eliminar</button>
         </td>
       `;
+
+      const row = document.createElement("tr");
+      row.innerHTML = rowHTML;
       postTable.appendChild(row);
     });
 
+    // 🔄 Asignar eventos después de renderizar
     asignarEventos();
-
   } catch (err) {
-    console.error(err);
-    alert("❌ Error: No se pudo conectar con el servidor.");
-  } finally {
-    ocultarLoader();
+    console.error("Error cargando datos:", err);
+    alert("❌ No se pudo conectar con el servidor.");
   }
 }
 
-/* =========================================================================
-   🗑 EVENTOS (ELIMINAR + VER)
-=========================================================================== */
+/* ============================================================
+   🗑 Eliminar usuario o publicación
+============================================================ */
 function asignarEventos() {
-  /* --- ELIMINAR --- */
   document.querySelectorAll(".delete-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
       const id = btn.dataset.id;
       const type = btn.dataset.type;
 
-      const ok = await customConfirm(
-        `¿Eliminar este ${type === "user" ? "usuario" : "post"}?`
-      );
+      const ok = await customConfirm(`¿Eliminar este ${type === "user" ? "usuario" : "post"}?`);
       if (!ok) return;
 
       try {
-        const endpoint =
-          type === "user"
-            ? `${API_URL}/${id}`
-            : `${API_POSTS}/${id}`;
-
-        const res = await fetch(endpoint, { method: "DELETE" });
+        const res = await fetch(`${API_URL}/${type === "user" ? "usuarios" : "publicaciones"}/${id}`, {
+          method: "DELETE"
+        });
 
         if (!res.ok) throw new Error("Error al eliminar");
 
-        mostrarSuccess(
-          `${type === "user" ? "Usuario" : "Publicación"} eliminado ✔`
-        );
-
+        mostrarSuccess(`${type === "user" ? "Usuario" : "Publicación"} eliminado correctamente ✔`);
         cargarDatos();
-      } catch (err) {
-        console.error(err);
-        alert("❌ No se pudo eliminar.");
+      } catch (error) {
+        console.error(error);
+        alert("❌ No se pudo eliminar el elemento.");
       }
     });
   });
 
-  /* --- VER PUBLICACIÓN --- */
+  // Ver publicaciones
   document.querySelectorAll(".view-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const texto = btn.dataset.texto;
@@ -181,7 +128,7 @@ function asignarEventos() {
       modalTitle.textContent = `Publicación de ${autor}`;
       modalContent.innerHTML = `
         <p>${texto}</p>
-        ${imagen ? `<img src="${imagen}" class="modal-img">` : "<p>Sin imagen</p>"}
+        ${imagen ? `<img src="${imagen}" alt="imagen publicación" class="modal-img">` : `<p>Sin imagen</p>`}
       `;
 
       modal.style.display = "flex";
@@ -189,9 +136,17 @@ function asignarEventos() {
   });
 }
 
-/* =========================================================================
-   📌 MODALES DE CONFIRMACIÓN
-=========================================================================== */
+// ======================
+// MODAL PERSONALIZADO
+// ======================
+const confirmModal = document.getElementById("confirmModal");
+const confirmText = document.getElementById("confirmText");
+const confirmCancel = document.getElementById("confirmCancel");
+const confirmOk = document.getElementById("confirmOk");
+
+let confirmResolve;
+
+// Función para mostrar el modal y esperar confirmación
 function customConfirm(message) {
   confirmText.textContent = message;
   confirmModal.style.display = "flex";
@@ -200,37 +155,47 @@ function customConfirm(message) {
     confirmResolve = resolve;
   });
 }
+
+// Botón cancelar
 confirmCancel.addEventListener("click", () => {
   confirmModal.style.display = "none";
   confirmResolve(false);
 });
+
+// Botón aceptar
 confirmOk.addEventListener("click", () => {
   confirmModal.style.display = "none";
   confirmResolve(true);
 });
 
-/* =========================================================================
-   🎉 MODAL DE EXITO
-=========================================================================== */
+// ======================
+// MODAL DE ÉXITO
+// ======================
+const successModal = document.getElementById("successModal");
+const successText = document.getElementById("successText");
+const successOk = document.getElementById("successOk");
+
+// función para mostrar el modal
 function mostrarSuccess(msg) {
   successText.textContent = msg;
   successModal.style.display = "flex";
 }
+
+// cerrar modal
 successOk.addEventListener("click", () => {
   successModal.style.display = "none";
 });
 
-/* =========================================================================
-   ❌ CERRAR MODAL VER
-=========================================================================== */
-closeModal.addEventListener("click", () => {
-  modal.style.display = "none";
-});
+/* ============================================================
+   👁 Cerrar modal
+============================================================ */
+closeModal.addEventListener("click", () => (modal.style.display = "none"));
+
 window.addEventListener("click", e => {
   if (e.target === modal) modal.style.display = "none";
 });
 
-/* =========================================================================
-   🚀 INICIO
-=========================================================================== */
+/* ============================================================
+   🚀 Cargar datos al iniciar
+============================================================ */
 cargarDatos();

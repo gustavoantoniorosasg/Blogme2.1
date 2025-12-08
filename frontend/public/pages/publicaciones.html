@@ -4,24 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>BlogMe | Publicaciones</title>
-
-  <!-- Config global -->
+    <!-- Aquí cargas config.js para definir la URL base del backend -->
   <script src="../config.js"></script>
 
-  <!-- CSS -->
+  <!-- CSS PRINCIPAL -->
   <link rel="stylesheet" href="../styles/publicaciones.css">
   <link rel="stylesheet" href="../styles/comments.css">
 
-  <!-- Icons -->
+  <!-- ICONOS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
+  <!-- DARK MODE AUTO -->
   <meta name="color-scheme" content="light dark">
 </head>
 
 <body>
-
-  <!-- Loader global -->
-  <div id="loader" class="page-loader" style="display:none">Cargando...</div>
 
   <!-- TOPBAR -->
   <header class="topbar">
@@ -54,7 +51,7 @@
         <button id="darkToggle" class="btn-nav" title="Tema">
           <i class="fa-solid fa-moon"></i>
         </button>
-
+        
         <a class="btn-nav" href="./publicaciones.html">Inicio</a>
         <a class="btn-nav" href="./perfil.html">Perfil</a>
 
@@ -65,13 +62,13 @@
     </nav>
   </header>
 
-  <!-- LAYOUT -->
+  <!-- LAYOUT PRINCIPAL -->
   <main class="container">
 
     <!-- PANEL IZQUIERDO -->
     <aside class="left-pane">
 
-      <!-- CREAR -->
+      <!-- CREAR PUBLICACIÓN -->
       <section class="create-box">
         <h3>Crear publicación</h3>
 
@@ -98,6 +95,8 @@
         <div class="file-row">
           <input id="newImg" type="file" accept="image/*" multiple>
           <span class="file-hint">Puedes subir varias imágenes</span>
+          <!-- PREVISUALIZACIÓN DE IMAGEN -->
+          <div id="previewContainer" style="margin-top:8px; display:flex; flex-wrap:wrap; gap:8px;"></div>
         </div>
 
         <div class="actions-row">
@@ -111,8 +110,7 @@
         <h4>Tu perfil</h4>
 
         <div class="pv">
-          <!-- RUTA CORREGIDA: usa images desde raíz -->
-          <img id="pvAvatar" src="/assents/img//avatar-placeholder.png" alt="avatar">
+          <img id="pvAvatar" src="../images/avatar-placeholder.png">
           <div>
             <strong id="pvName">Cargando...</strong>
             <p id="pvBio">---</p>
@@ -128,7 +126,7 @@
 
     </aside>
 
-    <!-- FEED -->
+    <!-- FEED CENTRADO GRANDE -->
     <section id="feed" class="feed">
       <div id="infiniteLoader" class="infinite-loader">Cargando...</div>
     </section>
@@ -136,11 +134,13 @@
     <!-- PANEL DERECHO -->
     <aside class="right-pane">
 
+      <!-- TENDENCIAS -->
       <section class="trending">
         <h4>Tendencias</h4>
         <ul id="trendingList"></ul>
       </section>
 
+      <!-- NOTAS -->
       <section class="notes">
         <h4>Notas compartidas</h4>
         <div id="notesList"></div>
@@ -151,7 +151,7 @@
 
   </main>
 
-  <!-- MODAL DE COMENTARIOS (NECESARIO PARA comments.js) -->
+  <!-- MODAL DE COMENTARIOS -->
   <div id="commentsModal" class="modal hidden">
     <div class="modal-content">
       <button id="closeComments" class="close">✕</button>
@@ -159,7 +159,7 @@
     </div>
   </div>
 
-  <!-- MODAL CONFIRMACIÓN (opcional, en caso publicaciones.js lo usa) -->
+  <!-- MODAL CONFIRMACIÓN -->
   <div id="confirmModal" class="modal hidden">
     <div class="modal-content small">
       <div id="confirmBody"></div>
@@ -170,12 +170,45 @@
     </div>
   </div>
 
+  <!-- MODAL PARA INSERTAR ENLACE -->
+<div id="linkModal" class="modal hidden">
+  <div class="modal-content small">
+    <h3>Insertar enlace</h3>
+
+    <input id="linkInput" type="text" placeholder="https://ejemplo.com">
+
+    <div class="modal-actions">
+      <button id="linkCancel" class="btn-ghost">Cancelar</button>
+      <button id="linkOk" class="btn-primary">Insertar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PARA INSERTAR IMAGEN -->
+<div class="modal hidden" id="modalImagen">
+  <div class="modal-content">
+    <h3>Insertar imagen desde URL</h3>
+    <input type="text" id="inputImagen" placeholder="https://mi-imagen.com/foto.jpg">
+    
+    <div class="modal-buttons">
+      <button id="btnInsertarImagen">Insertar</button>
+      <button onclick="cerrarModal('modalImagen')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+
+<button id="darkToggle" class="btn-nav" title="Tema">
+  <i class="fa-solid fa-moon"></i>
+</button>
+
+
   <!-- TOAST -->
   <div id="toast" class="toast hidden"></div>
 
   <!-- SCRIPTS -->
   <script src="../js/comments.js" defer></script>
-  <script src="../js/perfil.js" defer></script>
+  <script src="../js/perfil-mini.js" defer></script>
   <script src="../js/publicaciones.js" defer></script>
 
 </body>

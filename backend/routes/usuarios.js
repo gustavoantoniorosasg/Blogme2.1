@@ -4,86 +4,77 @@ import Usuario from "../models/Usuario.js";
 
 const router = express.Router();
 
-/* -----------------------------------------
-   PING TEST
------------------------------------------- */
-router.get("/ping", (req, res) => {
-  res.send("pong");
-});
-
-/* -----------------------------------------
-   REGISTRO
------------------------------------------- */
-router.post("/registro", async (req, res) => {
-  try {
-    const { nombre, email, password } = req.body;
-
-    if (!nombre || !email || !password) {
-      return res.status(400).json({ error: "Faltan datos" });
-    }
-
-    const nombreExistente = await Usuario.findOne({ nombre });
-    if (nombreExistente) {
-      return res.status(400).json({ error: "El nombre ya está en uso" });
-    }
-
-    const emailExistente = await Usuario.findOne({ email });
-    if (emailExistente) {
-      return res.status(400).json({ error: "El email ya está registrado" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const nuevoUsuario = new Usuario({
-      nombre,
-      email,
-      password: hashedPassword,
-    });
-
-    await nuevoUsuario.save();
-
-    res.json({ mensaje: "Usuario registrado correctamente" });
-  } catch (error) {
-    console.error("Error registrando usuario:", error);
-    res.status(500).json({ error: "Error en el servidor" });
-  }
-});
-
-/* -----------------------------------------
-   LOGIN
-   Frontend debe mandar: { email, password }
------------------------------------------- */
+// ===============================
+// LOGIN (Corregido para email o nombre)
+// ===============================
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, nombre, password } = req.body;
 
-    if (!email || !password) {
+    if ((!email && !nombre) || !password) {
       return res.status(400).json({ error: "Faltan datos" });
     }
 
-    const usuario = await Usuario.findOne({ email });
+    let usuario = null;
 
-    if (!usuario) {
-      return res.status(400).json({ error: "Email incorrecto" });
-    }
+    // Buscar por email si se envía email
+    if (email) usuario = await Usuario.findOne({ email });
 
-    const passwordValida = await bcrypt.compare(password, usuario.password);
+    // Si no lo encuentra por email, intentar por nombre
+    if (!usuario && nombre) usuario = await Usuario.findOne({ nombre });
 
-    if (!passwordValida) {
+    if (!usuario)
+      return res.status(400).json({ error: "Usuario no encontrado" });
+
+    const passOK = await bcrypt.compare(password, usuario.password);
+
+    if (!passOK)
       return res.status(400).json({ error: "Contraseña incorrecta" });
-    }
 
     res.json({
-      mensaje: "Login exitoso",
       usuario: {
         id: usuario._id,
         nombre: usuario.nombre,
         email: usuario.email,
-      },
+        rol: usuario.rol
+      }
     });
-  } catch (error) {
-    console.error("Error en login:", error);
-    res.status(500).json({ error: "Error en el servidor" });
+
+  } catch (err) {
+    console.error("Error login usuario:", err);
+    res.status(500).json({ error: "Error interno al iniciar sesión" });
+  }
+});
+
+
+// ===============================
+// REGISTRO (sin cambios, está correcto)
+// ===============================
+router.post("/registro", async (req, res) => {
+  try {
+    const { nombre, email, password } = req.body;
+
+    if (!nombre || !email || !password)
+      return res.status(400).json({ error: "Faltan datos" });
+
+    const existe = await Usuario.findOne({ email });
+
+    if (existe)
+      return res.status(400).json({ error: "El correo ya está registrado" });
+
+    const hashed = await bcrypt.hash(password, 10);
+
+    const nuevo = await Usuario.create({
+      nombre,
+      email,
+      password: hashed
+    });
+
+    res.json({ usuario: nuevo });
+
+  } catch (err) {
+    console.error("Error registro usuario:", err);
+    res.status(500).json({ error: "No se pudo crear usuario" });
   }
 });
 

@@ -7,30 +7,37 @@ import Publicacion from "../models/Publicaciones.js";
 const router = express.Router();
 
 /* ============================================================
-   🔐 LOGIN DE ADMINISTRADOR
+   🔐 LOGIN DE ADMINISTRADOR (Corregido)
 ============================================================ */
 router.post("/login", async (req, res) => {
   try {
-    const { nombre, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!nombre || !password) {
+    // Validación
+    if (!email || !password) {
       return res.status(400).json({ error: "Faltan datos" });
     }
 
-    const admin = await Admin.findOne({ username: nombre });
-    if (!admin)
+    // Buscar admin usando email (como define tu modelo)
+    const admin = await Admin.findOne({ email });
+
+    if (!admin) {
       return res.status(404).json({ error: "Administrador no encontrado" });
+    }
 
+    // Comparar contraseña
     const valid = await bcrypt.compare(password, admin.password);
-    if (!valid)
+    if (!valid) {
       return res.status(400).json({ error: "Contraseña incorrecta" });
+    }
 
+    // Respuesta correcta
     res.json({
       message: "Inicio de sesión exitoso",
       admin: {
         id: admin._id,
-        nombre: admin.username,
-        email: admin.correo,
+        nombre: admin.nombre,
+        email: admin.email,
         rol: admin.rol,
       },
     });
@@ -72,8 +79,9 @@ router.get("/publicaciones", async (req, res) => {
 router.delete("/usuarios/:id", async (req, res) => {
   try {
     const eliminado = await Usuario.findByIdAndDelete(req.params.id);
-    if (!eliminado)
+    if (!eliminado) {
       return res.status(404).json({ error: "Usuario no encontrado" });
+    }
 
     res.json({ message: "Usuario eliminado correctamente" });
   } catch (err) {
@@ -88,8 +96,9 @@ router.delete("/usuarios/:id", async (req, res) => {
 router.delete("/publicaciones/:id", async (req, res) => {
   try {
     const eliminado = await Publicacion.findByIdAndDelete(req.params.id);
-    if (!eliminado)
+    if (!eliminado) {
       return res.status(404).json({ error: "Publicación no encontrada" });
+    }
 
     res.json({ message: "Publicación eliminada correctamente" });
   } catch (err) {

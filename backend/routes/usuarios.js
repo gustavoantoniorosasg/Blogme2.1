@@ -4,36 +4,28 @@ import Usuario from "../models/Usuario.js";
 
 const router = express.Router();
 
-/* ============================================================
-   🔑 LOGIN DE USUARIO (por email o nombre)
-============================================================ */
+// ===============================
+// 🔑 LOGIN USUARIO (email o nombre)
+// ===============================
 router.post("/login", async (req, res) => {
   try {
     const { email, nombre, password } = req.body;
 
-    // Validación
-    if ((!email && !nombre) || !password) {
+    if ((!email && !nombre) || !password)
       return res.status(400).json({ error: "Faltan datos" });
-    }
 
     let usuario = null;
 
-    // Buscar por email si existe
     if (email) usuario = await Usuario.findOne({ email });
-
-    // Si no lo encontró, buscar por nombre
     if (!usuario && nombre) usuario = await Usuario.findOne({ nombre });
 
     if (!usuario)
       return res.status(404).json({ error: "Usuario no encontrado" });
 
-    // Comparar contraseña
     const passOK = await bcrypt.compare(password, usuario.password);
-
     if (!passOK)
       return res.status(400).json({ error: "Contraseña incorrecta" });
 
-    // Respuesta correcta
     res.json({
       usuario: {
         id: usuario._id,
@@ -42,40 +34,29 @@ router.post("/login", async (req, res) => {
         rol: usuario.rol,
       },
     });
-
   } catch (err) {
     console.error("Error login usuario:", err);
     res.status(500).json({ error: "Error interno al iniciar sesión" });
   }
 });
 
-/* ============================================================
-   📝 REGISTRO DE USUARIO
-============================================================ */
+// ===============================
+// 📝 REGISTRO DE USUARIO
+// ===============================
 router.post("/registro", async (req, res) => {
   try {
     const { nombre, email, password } = req.body;
 
-    if (!nombre || !email || !password) {
+    if (!nombre || !email || !password)
       return res.status(400).json({ error: "Faltan datos" });
-    }
 
-    // ¿Email existe?
     const existe = await Usuario.findOne({ email });
-
-    if (existe) {
+    if (existe)
       return res.status(400).json({ error: "El correo ya está registrado" });
-    }
 
-    // Encriptar contraseña
     const hashed = await bcrypt.hash(password, 10);
 
-    // Crear usuario
-    const nuevo = await Usuario.create({
-      nombre,
-      email,
-      password: hashed,
-    });
+    const nuevo = await Usuario.create({ nombre, email, password: hashed });
 
     res.json({
       message: "Usuario creado",
@@ -83,9 +64,9 @@ router.post("/registro", async (req, res) => {
         id: nuevo._id,
         nombre: nuevo.nombre,
         email: nuevo.email,
+        rol: nuevo.rol,
       },
     });
-
   } catch (err) {
     console.error("Error registro usuario:", err);
     res.status(500).json({ error: "No se pudo crear usuario" });

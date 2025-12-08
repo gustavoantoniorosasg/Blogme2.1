@@ -6,32 +6,25 @@ import Publicacion from "../models/Publicaciones.js";
 
 const router = express.Router();
 
-/* ============================================================
-   🔐 LOGIN DE ADMINISTRADOR
-============================================================ */
+// ===============================
+// 🔐 LOGIN ADMIN
+// ===============================
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validación
-    if (!email || !password) {
+    if (!email || !password)
       return res.status(400).json({ error: "Faltan datos" });
-    }
 
-    // Buscar admin usando email
     const admin = await Admin.findOne({ email });
 
-    if (!admin) {
+    if (!admin)
       return res.status(404).json({ error: "Administrador no encontrado" });
-    }
 
-    // Comparar contraseña
     const valid = await bcrypt.compare(password, admin.password);
-    if (!valid) {
+    if (!valid)
       return res.status(400).json({ error: "Contraseña incorrecta" });
-    }
 
-    // Respuesta
     res.json({
       message: "Inicio de sesión exitoso",
       admin: {
@@ -47,9 +40,9 @@ router.post("/login", async (req, res) => {
   }
 });
 
-/* ============================================================
-   👥 OBTENER TODOS LOS USUARIOS
-============================================================ */
+// ===============================
+// 👥 OBTENER TODOS LOS USUARIOS
+// ===============================
 router.get("/usuarios", async (req, res) => {
   try {
     const usuarios = await Usuario.find({}, "nombre email rol").lean();
@@ -60,15 +53,12 @@ router.get("/usuarios", async (req, res) => {
   }
 });
 
-/* ============================================================
-   📰 OBTENER TODAS LAS PUBLICACIONES
-============================================================ */
+// ===============================
+// 📰 OBTENER TODAS LAS PUBLICACIONES
+// ===============================
 router.get("/publicaciones", async (req, res) => {
   try {
-    const publicaciones = await Publicacion.find()
-      .sort({ createdAt: -1 })
-      .lean();
-
+    const publicaciones = await Publicacion.find().sort({ ts: -1 }).lean();
     res.json(publicaciones);
   } catch (err) {
     console.error("Error al obtener publicaciones:", err);
@@ -76,16 +66,14 @@ router.get("/publicaciones", async (req, res) => {
   }
 });
 
-/* ============================================================
-   🗑️ ELIMINAR USUARIO
-============================================================ */
+// ===============================
+// 🗑️ ELIMINAR USUARIO
+// ===============================
 router.delete("/usuarios/:id", async (req, res) => {
   try {
     const eliminado = await Usuario.findByIdAndDelete(req.params.id);
-
-    if (!eliminado) {
+    if (!eliminado)
       return res.status(404).json({ error: "Usuario no encontrado" });
-    }
 
     res.json({ message: "Usuario eliminado correctamente" });
   } catch (err) {
@@ -94,16 +82,14 @@ router.delete("/usuarios/:id", async (req, res) => {
   }
 });
 
-/* ============================================================
-   🗑️ ELIMINAR PUBLICACIÓN
-============================================================ */
+// ===============================
+// 🗑️ ELIMINAR PUBLICACIÓN
+// ===============================
 router.delete("/publicaciones/:id", async (req, res) => {
   try {
     const eliminado = await Publicacion.findByIdAndDelete(req.params.id);
-
-    if (!eliminado) {
+    if (!eliminado)
       return res.status(404).json({ error: "Publicación no encontrada" });
-    }
 
     res.json({ message: "Publicación eliminada correctamente" });
   } catch (err) {

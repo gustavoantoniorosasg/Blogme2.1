@@ -1,4 +1,3 @@
-// backend/routes/usuarios.js
 import express from "express";
 import Usuario from "../models/Usuario.js";
 import bcrypt from "bcrypt";
@@ -42,13 +41,13 @@ router.post("/registro", async (req, res) => {
 
     res.json({ mensaje: "Usuario registrado", usuario });
   } catch (e) {
-    console.error(e);
+    console.error("❌ Error en /registro:", e);
     res.status(500).json({ error: "Error al registrar" });
   }
 });
 
 // ==========================
-//       LOGIN
+//          LOGIN
 // ==========================
 router.post("/login", async (req, res) => {
   try {
@@ -75,7 +74,7 @@ router.post("/login", async (req, res) => {
       }
     });
   } catch (e) {
-    console.error(e);
+    console.error("❌ Error en /login:", e);
     res.status(500).json({ error: "Error en login" });
   }
 });
@@ -97,7 +96,7 @@ router.put("/:id", async (req, res) => {
 
     res.json({ mensaje: "Perfil actualizado", usuario: actualizado });
   } catch (e) {
-    console.error(e);
+    console.error("❌ Error en PUT /:id:", e);
     res.status(500).json({ error: "Error al actualizar" });
   }
 });

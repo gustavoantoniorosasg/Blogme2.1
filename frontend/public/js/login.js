@@ -80,12 +80,11 @@ function validarPassword(pass) {
 
 
 // ===========================================================
-// 🔐 LOGIN — ADMIN ➝ Usuario normal
+// 🔐 LOGIN — POR NOMBRE
 // ===========================================================
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // AHORA login por nombre, NO correo
   const nombre = document.getElementById("login-nombre").value.trim();
   const password = document.getElementById("login-password").value.trim();
 
@@ -96,7 +95,7 @@ loginForm.addEventListener("submit", async (e) => {
     return showToast("Contraseña inválida", "warn");
 
   try {
-    // 1️⃣ ADMIN login
+    // 1️⃣ Intento login de administrador
     const adminResp = await fetch(`${window.API_ADMIN}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -108,12 +107,15 @@ loginForm.addEventListener("submit", async (e) => {
       const data = await adminResp.json();
       localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
       localStorage.setItem("adminSession", "true");
-      showToast(`Bienvenido administrador`, "success");
 
-      return setTimeout(() => (window.location.href = "/admin-panel.html"), 800);
+      showToast(`Bienvenido administrador 👑`, "success");
+
+      return setTimeout(() => {
+        window.location.href = "/admin-panel.html";
+      }, 800);
     }
 
-    // 2️⃣ Login usuario normal
+    // 2️⃣ Si no es admin, login normal
     const respUser = await fetch(`${window.API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -129,8 +131,11 @@ loginForm.addEventListener("submit", async (e) => {
     localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
     localStorage.removeItem("adminSession");
 
-    showToast(`Bienvenido ${data.usuario.nombre}`, "success");
-    setTimeout(() => (window.location.href = "/publicaciones.html"), 700);
+    showToast(`Bienvenido ${data.usuario.nombre} 👋`, "success");
+
+    setTimeout(() => {
+      window.location.href = "/publicaciones.html";
+    }, 700);
 
   } catch (error) {
     console.error(error);
@@ -146,31 +151,33 @@ registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const nombre = document.getElementById("reg-username").value.trim();
-  const email = document.getElementById("reg-correo").value.trim();
+  const correo = document.getElementById("reg-correo").value.trim();
   const password = document.getElementById("reg-password").value.trim();
 
-  if (!nombre || !email || !password)
+  if (!nombre || !correo || !password)
     return showToast("Completa todos los campos", "warn");
 
   if (!validarPassword(password))
-    return showToast("La contraseña debe tener 6+ caracteres", "warn");
+    return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
 
   try {
     const resp = await fetch(`${window.API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ nombre, correo: email, password })
+      body: JSON.stringify({ nombre, correo, password })
     });
 
-    let data = {};
-    try { data = await resp.json(); } catch {}
+    const data = await resp.json();
 
     if (!resp.ok)
       return showToast(data.error || "Error al registrarse", "error");
 
     showToast("Cuenta creada con éxito 🎉", "success");
-    setTimeout(() => loginTab.click(), 600);
+
+    setTimeout(() => {
+      loginTab.click();
+    }, 600);
 
   } catch (error) {
     console.error(error);

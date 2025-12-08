@@ -20,6 +20,7 @@ function showToast(msg, type = "info") {
   }, 2500);
 }
 
+
 // estilos toast
 const toastStyle = document.createElement("style");
 toastStyle.innerHTML = `
@@ -81,7 +82,8 @@ function validarPassword(pass) {
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const nombre = document.getElementById("login-username").value.trim();
+  // 🔥 ID corregidos
+  const nombre = document.getElementById("login-nombre").value.trim();
   const password = document.getElementById("login-password").value.trim();
 
   if (!nombre || !password) return showToast("Completa todos los campos", "warn");
@@ -135,14 +137,10 @@ loginForm.addEventListener("submit", async (e) => {
     showToast("No se pudo conectar con el servidor", "error");
   }
 });
-
-// ===========================================================
-// 📝 REGISTRO CORREGIDO
-// ===========================================================
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const nombre = document.getElementById("reg-username").value.trim();
+  const nombre = document.getElementById("reg-nombre").value.trim();
   const email = document.getElementById("reg-email").value.trim();
   const password = document.getElementById("reg-password").value.trim();
 
@@ -153,7 +151,8 @@ registerForm.addEventListener("submit", async (e) => {
     return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
 
   try {
-    const resp = await fetch(`${window.API_USUARIOS}/registrar`, {
+    // 🔥 Ruta corregida: /registro
+    const resp = await fetch(`${window.API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre, email, password })

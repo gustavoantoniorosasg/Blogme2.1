@@ -148,7 +148,6 @@ registerForm.addEventListener("submit", async (e) => {
   const username = document.getElementById("reg-username").value.trim();
   const correo = document.getElementById("reg-correo").value.trim();
   const password = document.getElementById("reg-password").value.trim();
-  const avatar = document.getElementById("reg-avatar").value.trim();
 
   const data = {
     username,

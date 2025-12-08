@@ -12,8 +12,7 @@ router.get("/ping", (req, res) => {
 });
 
 /* -----------------------------------------
-   REGISTRO DE USUARIO
-   Frontend manda: { nombre, email, password }
+   REGISTRO
 ------------------------------------------ */
 router.post("/registro", async (req, res) => {
   try {
@@ -23,19 +22,16 @@ router.post("/registro", async (req, res) => {
       return res.status(400).json({ error: "Faltan datos" });
     }
 
-    // Validar nombre existente
     const nombreExistente = await Usuario.findOne({ nombre });
     if (nombreExistente) {
       return res.status(400).json({ error: "El nombre ya está en uso" });
     }
 
-    // Validar email existente
     const emailExistente = await Usuario.findOne({ email });
     if (emailExistente) {
       return res.status(400).json({ error: "El email ya está registrado" });
     }
 
-    // Encriptar contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const nuevoUsuario = new Usuario({
@@ -55,20 +51,20 @@ router.post("/registro", async (req, res) => {
 
 /* -----------------------------------------
    LOGIN
-   Frontend manda: { nombre, password }
+   Frontend debe mandar: { email, password }
 ------------------------------------------ */
 router.post("/login", async (req, res) => {
   try {
-    const { nombre, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!nombre || !password) {
+    if (!email || !password) {
       return res.status(400).json({ error: "Faltan datos" });
     }
 
-    const usuario = await Usuario.findOne({ nombre });
+    const usuario = await Usuario.findOne({ email });
 
     if (!usuario) {
-      return res.status(400).json({ error: "Nombre incorrecto" });
+      return res.status(400).json({ error: "Email incorrecto" });
     }
 
     const passwordValida = await bcrypt.compare(password, usuario.password);
@@ -83,7 +79,6 @@ router.post("/login", async (req, res) => {
         id: usuario._id,
         nombre: usuario.nombre,
         email: usuario.email,
-        avatar: usuario.avatar,
       },
     });
   } catch (error) {

@@ -1,7 +1,7 @@
 console.log("🌍 API USUARIOS:", window.API_USUARIOS);
 
 // ===========================================================
-// 🔔 SISTEMA DE TOAST
+// 🔔 TOAST SYSTEM
 // ===========================================================
 function showToast(msg, type = "info") {
   let toast = document.getElementById("toast");
@@ -20,8 +20,6 @@ function showToast(msg, type = "info") {
   }, 2500);
 }
 
-
-// estilos toast
 const toastStyle = document.createElement("style");
 toastStyle.innerHTML = `
 #toast {
@@ -44,12 +42,12 @@ toastStyle.innerHTML = `
 #toast.show { visibility: visible; opacity: 1; }
 #toast.success { background: #28a745cc; }
 #toast.error { background: #dc3545cc; }
-#toast.warn { background: #ffc107cc; color: #000; }
+#toast.warn  { background: #ffc107cc; color:#000; }
 `;
 document.head.appendChild(toastStyle);
 
 // ===========================================================
-// 🔄 Cambio de formulario LOGIN ⟷ REGISTRO
+// Form switching
 // ===========================================================
 const loginTab = document.getElementById("login-tab");
 const registerTab = document.getElementById("register-tab");
@@ -70,28 +68,27 @@ registerTab.addEventListener("click", () => {
 });
 
 // ===========================================================
-// ✨ VALIDACIONES
+// Validations
 // ===========================================================
 function validarPassword(pass) {
   return pass.length >= 6;
 }
 
 // ===========================================================
-// 🔐 LOGIN
+// LOGIN
 // ===========================================================
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // 🔥 ID corregidos
-  const nombre = document.getElementById("login-nombre").value.trim();
-  const password = document.getElementById("login-password").value.trim();
+  const nombre = document.getElementById("login-nombre")?.value.trim();
+  const password = document.getElementById("login-password")?.value.trim();
 
   if (!nombre || !password) return showToast("Completa todos los campos", "warn");
 
   if (!validarPassword(password)) return showToast("Contraseña inválida", "warn");
 
   try {
-    // 1️⃣ Intentar login admin
+    // 🔐 Login administrador
     const adminResp = await fetch(`${window.API_ADMIN}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -110,7 +107,7 @@ loginForm.addEventListener("submit", async (e) => {
       }, 800);
     }
 
-    // 2️⃣ Login usuario normal
+    // 🔐 Login usuario normal
     const userResp = await fetch(`${window.API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -137,12 +134,16 @@ loginForm.addEventListener("submit", async (e) => {
     showToast("No se pudo conectar con el servidor", "error");
   }
 });
+
+// ===========================================================
+// REGISTRO
+// ===========================================================
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const nombre = document.getElementById("reg-nombre").value.trim();
-  const email = document.getElementById("reg-email").value.trim();
-  const password = document.getElementById("reg-password").value.trim();
+  const nombre = document.getElementById("reg-nombre")?.value.trim();
+  const email = document.getElementById("reg-email")?.value.trim();
+  const password = document.getElementById("reg-password")?.value.trim();
 
   if (!nombre || !email || !password)
     return showToast("Completa todos los campos", "warn");
@@ -151,7 +152,6 @@ registerForm.addEventListener("submit", async (e) => {
     return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
 
   try {
-    // 🔥 Ruta corregida: /registro
     const resp = await fetch(`${window.API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -1,34 +1,39 @@
+// backend/models/Usuario.js
 import mongoose from "mongoose";
 
-const UsuarioSchema = new mongoose.Schema(
-  {
-    nombre: {
-      type: String,
-      required: true,
-      trim: true
-    },
-
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true
-    },
-
-    password: {
-      type: String,
-      required: true
-    },
-
-    avatar: {
-      type: String,
-      default: "https://i.imgur.com/2ZzK8K7.png"
-    }
+const UsuarioSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+    unique: true
   },
-  {
-    timestamps: true
-  }
-);
 
-export default mongoose.model("Usuario", UsuarioSchema);
+  correo: {
+    type: String,
+    required: true,
+    unique: true
+  },
+
+  password: {
+    type: String,
+    required: true
+  },
+
+  avatar: {
+    type: String,
+    default: "https://api.dicebear.com/9.x/thumbs/svg?seed=user"
+  },
+
+  rol: {
+    type: String,
+    default: "usuario"
+  },
+
+  fechaRegistro: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+// 👇 fuerza a usar colección "usuarios"
+export default mongoose.model("Usuario", UsuarioSchema, "usuarios");

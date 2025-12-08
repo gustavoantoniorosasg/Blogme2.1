@@ -1,26 +1,23 @@
-// ✅ backend/models/Admin.js
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
+import Admin from "./models/Admin.js";
+import dotenv from "dotenv";
+dotenv.config();
 
-const AdminSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  correo: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  rol: {
-    type: String,
-    default: "admin",
-  },
-});
+const crearAdmin = async () => {
+  await mongoose.connect(process.env.MONGO_URI);
 
-// 👇 Forzar a que use exactamente la colección "administradores"
-export default mongoose.model("Admin", AdminSchema, "administradores");
+  const passwordHash = await bcrypt.hash("123456", 10);
+
+  await Admin.create({
+    username: "admin",
+    correo: "admin@blogme.com",
+    password: passwordHash,
+    rol: "admin",
+  });
+
+  console.log("Admin creado correctamente");
+  process.exit();
+};
+
+crearAdmin();

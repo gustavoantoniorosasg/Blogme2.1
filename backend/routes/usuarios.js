@@ -1,8 +1,3 @@
-router.get("/ping", (req, res) => res.send("pong"));
-
-// ===========================================================
-// 🌐 usuarios.js — API de usuarios
-// ===========================================================
 import express from "express";
 import Usuario from "../models/Usuario.js";
 import bcrypt from "bcrypt";
@@ -21,14 +16,14 @@ router.get("/ping", (req, res) => {
 ========================================== */
 router.post("/registro", async (req, res) => {
   try {
-    const { nombre, email, password, avatar } = req.body;
+    const { username, correo, password, avatar } = req.body;
 
-    if (!nombre || !email || !password) {
+    if (!username || !correo || !password) {
       return res.status(400).json({ error: "Faltan datos" });
     }
 
-    // Verificar si ya existe el email
-    const existe = await Usuario.findOne({ email });
+    // Verificar si ya existe el correo
+    const existe = await Usuario.findOne({ correo });
     if (existe) {
       return res.status(400).json({ error: "El correo ya existe" });
     }
@@ -38,16 +33,18 @@ router.post("/registro", async (req, res) => {
 
     // Crear nuevo usuario
     const nuevo = new Usuario({
-      nombre,
-      email,
+      username,
+      correo,
       password: passwordEncriptada,
-      avatar: avatar || "https://i.imgur.com/2ZzK8K7.png"
+      avatar: avatar || "https://api.dicebear.com/9.x/thumbs/svg?seed=user",
     });
 
     await nuevo.save();
 
-    // ✅ Responder correctamente al frontend
-    res.status(201).json({ message: "Usuario registrado con éxito", usuario: nuevo });
+    res.status(201).json({
+      message: "Usuario registrado con éxito",
+      usuario: nuevo,
+    });
 
   } catch (err) {
     console.error(err);
@@ -60,21 +57,28 @@ router.post("/registro", async (req, res) => {
 ========================================== */
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { correo, password } = req.body;
 
-    if (!email || !password) {
+    if (!correo || !password) {
       return res.status(400).json({ error: "Faltan datos" });
     }
 
-    const usuario = await Usuario.findOne({ email });
-    if (!usuario) return res.status(404).json({ error: "No existe el usuario" });
+    const usuario = await Usuario.findOne({ correo });
+    if (!usuario)
+      return res.status(404).json({ error: "No existe el usuario" });
 
     const coincide = await bcrypt.compare(password, usuario.password);
-    if (!coincide) return res.status(403).json({ error: "Contraseña incorrecta" });
+    if (!coincide)
+      return res.status(403).json({ error: "Contraseña incorrecta" });
 
     res.json({
       message: "Login correcto",
-      usuario
+      usuario: {
+        id: usuario._id,
+        username: usuario.username,
+        correo: usuario.correo,
+        avatar: usuario.avatar,
+      },
     });
 
   } catch (err) {
@@ -108,19 +112,22 @@ router.get("/:id", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const data = req.body;
-
-    // Evitar sobrescribir la contraseña directamente
     delete data.password;
 
-    const actualizado = await Usuario.findByIdAndUpdate(req.params.id, data, {
-      new: true
-    }).select("-password");
+    const actualizado = await Usuario.findByIdAndUpdate(
+      req.params.id,
+      data,
+      { new: true }
+    ).select("-password");
 
     if (!actualizado) {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
 
-    res.json({ message: "Perfil actualizado", usuario: actualizado });
+    res.json({
+      message: "Perfil actualizado",
+      usuario: actualizado,
+    });
 
   } catch (err) {
     console.error(err);

@@ -145,35 +145,55 @@ loginForm.addEventListener("submit", async (e) => {
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const nombre = document.getElementById("reg-username").value.trim();
-  const email = document.getElementById("reg-correo").value.trim();
+  const username = document.getElementById("reg-username").value.trim();
+  const correo = document.getElementById("reg-correo").value.trim();
   const password = document.getElementById("reg-password").value.trim();
+  const avatarFile = document.getElementById("reg-avatar").files[0];
 
-  if (!nombre || !email || !password)
-    return showToast("Completa todos los campos", "warn");
+  registerMsg.textContent = "Creando cuenta...";
 
-  if (!validarPassword(password))
-    return showToast("La contraseña debe tener 6+ caracteres", "warn");
+  let avatarURL = "https://i.imgur.com/2ZzK8K7.png"; // avatar por defecto
 
   try {
-    const resp = await fetch(`${window.API_USUARIOS}/registro`, {
+    // 🟣 SI EL USUARIO SUBIÓ UNA IMAGEN → subirla a Cloudinary
+    if (avatarFile) {
+      const data = new FormData();
+      data.append("file", avatarFile);
+      data.append("upload_preset", "blogme");  // TU PRESET
+      data.append("cloud_name", "TU_CLOUD_NAME"); // TU CLOUD NAME
+
+      const cloudRes = await fetch(
+        "https://api.cloudinary.com/v1_1/TU_CLOUD_NAME/image/upload",
+        { method: "POST", body: data }
+      );
+
+      const cloudJson = await cloudRes.json();
+      avatarURL = cloudJson.secure_url;
+    }
+
+    // 🟢 Registrar en tu backend
+    const res = await fetch(`${API_URL}/usuarios/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ nombre, email, password })
+      body: JSON.stringify({
+        nombre: username,
+        email: correo,
+        password,
+        avatar: avatarURL
+      }),
     });
 
-    let data = {};
-    try { data = await resp.json(); } catch {}
+    const json = await res.json();
 
-    if (!resp.ok)
-      return showToast(data.error || "Error al registrarse", "error");
+    if (!res.ok) {
+      registerMsg.textContent = json.error;
+      return;
+    }
 
-    showToast("Cuenta creada con éxito 🎉", "success");
-    setTimeout(() => loginTab.click(), 600);
+    registerMsg.textContent = "Cuenta creada correctamente 🔥";
 
   } catch (error) {
     console.error(error);
-    showToast("Error al conectar con el servidor", "error");
+    registerMsg.textContent = "Error en el servidor";
   }
 });

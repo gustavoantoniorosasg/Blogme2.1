@@ -44,6 +44,7 @@ router.post("/login", async (req, res) => {
    📝 REGISTRO DE USUARIO
 ============================================================ */
 router.post("/registro", async (req, res) => {
+    console.log("REQ.BODY registro:", req.body); // <- aquí
   try {
     const { nombre, email, password } = req.body;
 

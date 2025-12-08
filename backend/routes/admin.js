@@ -11,9 +11,15 @@ const router = express.Router();
 ============================================================ */
 router.post("/login", async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, nombre, password } = req.body;
 
-    const admin = await Admin.findOne({ username });
+    // soporte doble por si frontend envía nombre
+    const userField = username || nombre;
+
+    if (!userField || !password)
+      return res.status(400).json({ error: "Faltan datos" });
+
+    const admin = await Admin.findOne({ username: userField });
     if (!admin)
       return res.status(404).json({ error: "Administrador no encontrado" });
 
@@ -41,7 +47,7 @@ router.post("/login", async (req, res) => {
 ============================================================ */
 router.get("/usuarios", async (req, res) => {
   try {
-    const usuarios = await Usuario.find({}, "username correo rol").lean();
+    const usuarios = await Usuario.find({}, "nombre email rol").lean();
     res.json(usuarios);
   } catch (err) {
     console.error("Error al obtener usuarios:", err);

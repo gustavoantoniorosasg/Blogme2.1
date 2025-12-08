@@ -96,7 +96,7 @@ loginForm.addEventListener("submit", async (e) => {
 
   try {
     // 1️⃣ Intento login de admin
-    const adminResp = await fetch(`${window.API_ADMIN}/admin`, {
+    const adminResp = await fetch(`${window.API_ADMIN}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -105,6 +105,7 @@ loginForm.addEventListener("submit", async (e) => {
 
     if (adminResp.ok) {
       const data = await adminResp.json();
+      console.log("🔎 Backend responde:", data);
       localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
       localStorage.setItem("adminSession", "true");
 
@@ -116,7 +117,7 @@ loginForm.addEventListener("submit", async (e) => {
     }
 
     // 2️⃣ Login usuario normal
-    const respUser = await fetch(`${window.API_USUARIOS}/usuarios`, {
+    const respUser = await fetch(`${window.API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -147,11 +148,16 @@ loginForm.addEventListener("submit", async (e) => {
 // ===========================================================
 // 📝 REGISTRO DE USUARIOS
 // ===========================================================
+console.log("🌍 API USUARIOS:", window.API_USUARIOS);
+
+// ===========================================================
+// 📝 REGISTRO DE USUARIOS
+// ===========================================================
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const nombre = document.getElementById("reg-username").value.trim();
-  const correo = document.getElementById("reg-correo").value.trim();
+  const correo = document.getElementById("reg-correo").value.trim(); // frontend usa correo
   const password = document.getElementById("reg-password").value.trim();
 
   if (!nombre || !correo || !password)
@@ -161,11 +167,11 @@ registerForm.addEventListener("submit", async (e) => {
     return showToast("La contraseña debe tener mínimo 6 caracteres", "warn");
 
   try {
-    const resp = await fetch(`${window.API_USUARIOS}/registro`, {
+    const resp = await fetch(`${window.API_USUARIOS}/registrar`, {  // ← corregido
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ nombre, correo, password })
+      body: JSON.stringify({ nombre, email: correo, password }) // backend espera email, no correo
     });
 
     const data = await resp.json();

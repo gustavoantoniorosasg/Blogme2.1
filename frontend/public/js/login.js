@@ -150,7 +150,7 @@ loginForm.addEventListener("submit", async (e) => {
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const nombre = document.getElementById("reg-username").value.trim();
+  const nombre = document.getElementById("reg-nombre").value.trim();
   const correo = document.getElementById("reg-correo").value.trim();
   const password = document.getElementById("reg-password").value.trim();
 

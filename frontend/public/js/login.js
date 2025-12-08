@@ -96,7 +96,7 @@ loginForm.addEventListener("submit", async (e) => {
 
   try {
     // 1️⃣ Intento login de admin
-    const adminResp = await fetch(`${window.API_ADMIN}/login`, {
+    const adminResp = await fetch(`${window.API_ADMIN}/admin`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -116,7 +116,7 @@ loginForm.addEventListener("submit", async (e) => {
     }
 
     // 2️⃣ Login usuario normal
-    const respUser = await fetch(`${window.API_USUARIOS}/login`, {
+    const respUser = await fetch(`${window.API_USUARIOS}/usuarios`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

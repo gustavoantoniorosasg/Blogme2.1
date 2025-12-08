@@ -67,7 +67,7 @@ const crearAdminPorDefecto = async () => {
     const existeAdmin = await Admin.findOne({ nombre: "admin" });
     if (existeAdmin) return console.log("⚙️ Admin ya existe");
 
-    const hashedPassword = await bcrypt.hash("12345", 10);
+    const hashedPassword = await bcrypt.hash("123456", 10);
 
     await Admin.create({
       nombre: "admin",
@@ -76,7 +76,7 @@ const crearAdminPorDefecto = async () => {
       rol: "admin",
     });
 
-    console.log("👑 Admin creado automáticamente → admin / 12345");
+    console.log("👑 Admin creado automáticamente → admin / 123456");
   } catch (err) {
     console.error("❌ Error creando admin:", err.message);
   }

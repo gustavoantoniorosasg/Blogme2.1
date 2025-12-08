@@ -1,4 +1,4 @@
-console.log("🌍 API apuntando a:", API_USUARIOS);
+console.log("🌍 API apuntando a:", window.API_USUARIOS);
 
 // ===========================================================
 // 🔔 TOAST SYSTEM
@@ -80,27 +80,28 @@ function validarPassword(pass) {
 
 
 // ===========================================================
-// 🔐 LOGIN — Intento Admin → Luego Usuario normal
+// 🔐 LOGIN — ADMIN ➝ Usuario normal
 // ===========================================================
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const email = document.getElementById("login-correo").value.trim();
+  // AHORA login por nombre, NO correo
+  const nombre = document.getElementById("login-correo").value.trim();
   const password = document.getElementById("login-password").value.trim();
 
-  if (!email || !password)
+  if (!nombre || !password)
     return showToast("Completa todos los campos", "warn");
 
   if (!validarPassword(password))
     return showToast("Contraseña inválida", "warn");
 
   try {
-    // 1️⃣ Intentar Login como ADMIN
-    const adminResp = await fetch(`${API_ADMIN}/login`, {
+    // 1️⃣ ADMIN login
+    const adminResp = await fetch(`${window.API_ADMIN}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ nombre, password })
     });
 
     if (adminResp.ok) {
@@ -112,12 +113,12 @@ loginForm.addEventListener("submit", async (e) => {
       return setTimeout(() => (window.location.href = "/admin-panel.html"), 800);
     }
 
-    // 2️⃣ Intentar login como usuario normal
-    const respUser = await fetch(`${API_USUARIOS}/login`, {
+    // 2️⃣ Login usuario normal
+    const respUser = await fetch(`${window.API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ nombre, password })
     });
 
     const data = await respUser.json();
@@ -155,18 +156,18 @@ registerForm.addEventListener("submit", async (e) => {
     return showToast("La contraseña debe tener 6+ caracteres", "warn");
 
   try {
-    const resp = await fetch(`${API_USUARIOS}/registro`, {
+    const resp = await fetch(`${window.API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ nombre, email, password }),
+      body: JSON.stringify({ nombre, email, password })
     });
 
     let data = {};
     try { data = await resp.json(); } catch {}
 
     if (!resp.ok)
-      return showToast(data.msg || data.error || "Error al registrarse", "error");
+      return showToast(data.error || "Error al registrarse", "error");
 
     showToast("Cuenta creada con éxito 🎉", "success");
     setTimeout(() => loginTab.click(), 600);

@@ -81,7 +81,7 @@ function validarPassword(pass) {
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const nombre = document.getElementById("login-nombre").value.trim();
+  const nombre = document.getElementById("login-username").value.trim();
   const password = document.getElementById("login-password").value.trim();
 
   if (!nombre || !password) return showToast("Completa todos los campos", "warn");
@@ -108,7 +108,7 @@ loginForm.addEventListener("submit", async (e) => {
       }, 800);
     }
 
-    // 2️⃣ Si no es admin, intentar usuario normal
+    // 2️⃣ Login usuario normal
     const userResp = await fetch(`${window.API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -143,7 +143,7 @@ registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const nombre = document.getElementById("reg-username").value.trim();
-  const email = document.getElementById("reg-correo").value.trim();
+  const email = document.getElementById("reg-email").value.trim();
   const password = document.getElementById("reg-password").value.trim();
 
   if (!nombre || !email || !password)

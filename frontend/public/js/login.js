@@ -145,34 +145,35 @@ loginForm.addEventListener("submit", async (e) => {
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const username = document.getElementById("reg-username").value.trim();
-  const correo = document.getElementById("reg-correo").value.trim();
+  const nombre = document.getElementById("reg-username").value.trim();
+  const email = document.getElementById("reg-correo").value.trim();
   const password = document.getElementById("reg-password").value.trim();
 
-  const data = {
-    username,
-    correo,
-    password,
-    avatar: avatar || null
-  };
+  if (!nombre || !email || !password)
+    return showToast("Completa todos los campos", "warn");
+
+  if (!validarPassword(password))
+    return showToast("La contraseña debe tener 6+ caracteres", "warn");
 
   try {
-    const res = await fetch(`${API_URL}/usuarios/registro`, {
+    const resp = await fetch(`${window.API_USUARIOS}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      credentials: "include",
+      body: JSON.stringify({ nombre, email, password })
     });
 
-    const json = await res.json();
+    let data = {};
+    try { data = await resp.json(); } catch {}
 
-    if (!res.ok) {
-      registerMsg.textContent = json.error;
-      return;
-    }
+    if (!resp.ok)
+      return showToast(data.error || "Error al registrarse", "error");
 
-    registerMsg.textContent = "Cuenta creada 🔥";
+    showToast("Cuenta creada con éxito 🎉", "success");
+    setTimeout(() => loginTab.click(), 600);
 
-  } catch (err) {
-    registerMsg.textContent = "Error en el servidor";
+  } catch (error) {
+    console.error(error);
+    showToast("Error al conectar con el servidor", "error");
   }
 });

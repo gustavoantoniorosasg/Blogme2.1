@@ -78,73 +78,73 @@ document.addEventListener("DOMContentLoaded", () => {
     return pass.length >= 6;
   }
 
-  // ===========================================================
-  // 🔐 LOGIN
-  // ===========================================================
-  loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+// ===========================================================
+// 🔐 LOGIN (CORREGIDO PARA EMAIL + PASSWORD)
+// ===========================================================
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const nombreInput = document.getElementById("login-nombre");
-    const passInput = document.getElementById("login-password");
+  const emailInput = document.getElementById("login-nombre");  // mismo input pero ahora será email
+  const passInput = document.getElementById("login-password");
 
-    if (!nombreInput || !passInput) {
-      return showToast("Error en el formulario, recarga la página", "error");
-    }
+  if (!emailInput || !passInput) {
+    return showToast("Error en el formulario, recarga la página", "error");
+  }
 
-    const nombre = nombreInput.value.trim();
-    const password = passInput.value.trim();
+  const email = emailInput.value.trim();
+  const password = passInput.value.trim();
 
-    if (!nombre || !password) return showToast("Completa todos los campos", "warn");
+  if (!email || !password) return showToast("Completa todos los campos", "warn");
 
-    if (!validarPassword(password)) return showToast("Contraseña inválida", "warn");
+  if (!validarPassword(password)) return showToast("Contraseña inválida", "warn");
 
-    try {
-      // 1️⃣ Intentar login admin
-      const adminResp = await fetch(`${window.API_ADMIN}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, password })
-      });
+  try {
+    // 1️⃣ Intentar login admin — AHORA CON EMAIL
+    const adminResp = await fetch(`${window.API_ADMIN}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
 
-      if (adminResp.ok) {
-        const data = await adminResp.json();
-        localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
-        localStorage.setItem("adminSession", "true");
+    if (adminResp.ok) {
+      const data = await adminResp.json();
+      localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
+      localStorage.setItem("adminSession", "true");
 
-        showToast("Bienvenido administrador 👑", "success");
+      showToast("Bienvenido administrador 👑", "success");
 
-        return setTimeout(() => {
-          window.location.href = "/admin-panel.html";
-        }, 800);
-      }
-
-      // 2️⃣ Login usuario normal
-      const userResp = await fetch(`${window.API_USUARIOS}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, password })
-      });
-
-      const data = await userResp.json();
-
-      if (!userResp.ok) {
-        return showToast(data.error || "Credenciales incorrectas", "error");
-      }
-
-      localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
-      localStorage.removeItem("adminSession");
-
-      showToast(`Bienvenido ${data.usuario.nombre} 👋`, "success");
-
-      setTimeout(() => {
-        window.location.href = "/publicaciones.html";
+      return setTimeout(() => {
+        window.location.href = "/admin-panel.html";
       }, 800);
-
-    } catch (error) {
-      console.error("⚠️ Error en login:", error);
-      showToast("No se pudo conectar con el servidor", "error");
     }
-  });
+
+    // 2️⃣ Login usuario normal — AHORA CON EMAIL
+    const userResp = await fetch(`${window.API_USUARIOS}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await userResp.json();
+
+    if (!userResp.ok) {
+      return showToast(data.error || "Credenciales incorrectas", "error");
+    }
+
+    localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
+    localStorage.removeItem("adminSession");
+
+    showToast(`Bienvenido ${data.usuario.nombre} 👋`, "success");
+
+    setTimeout(() => {
+      window.location.href = "/publicaciones.html";
+    }, 800);
+
+  } catch (error) {
+    console.error("⚠️ Error en login:", error);
+    showToast("No se pudo conectar con el servidor", "error");
+  }
+});
 
   // ===========================================================
   // 📝 REGISTRO

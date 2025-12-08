@@ -64,14 +64,14 @@ const conectarDB = async () => {
 
 const crearAdminPorDefecto = async () => {
   try {
-    const existeAdmin = await Admin.findOne({ username: "admin" });
+    const existeAdmin = await Admin.findOne({ nombre: "admin" });
     if (existeAdmin) return console.log("⚙️ Admin ya existe");
 
     const hashedPassword = await bcrypt.hash("12345", 10);
 
     await Admin.create({
-      username: "admin",
-      correo: "admin@blogme.com",
+      nombre: "admin",
+      email: "admin@blogme.com",
       password: hashedPassword,
       rol: "admin",
     });

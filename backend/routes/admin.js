@@ -11,28 +11,29 @@ const router = express.Router();
 ============================================================ */
 router.post("/login", async (req, res) => {
   try {
-    const { username, nombre, password } = req.body;
+    const { nombre, password } = req.body;
 
-    // soporte doble por si frontend envía nombre
-    const userField = username || nombre;
-
-    if (!userField || !password)
+    if (!nombre || !password) {
       return res.status(400).json({ error: "Faltan datos" });
+    }
 
-    const admin = await Admin.findOne({ username: userField });
-    if (!admin)
+    const admin = await Admin.findOne({ nombre });
+
+    if (!admin) {
       return res.status(404).json({ error: "Administrador no encontrado" });
+    }
 
     const valid = await bcrypt.compare(password, admin.password);
-    if (!valid)
+    if (!valid) {
       return res.status(400).json({ error: "Contraseña incorrecta" });
+    }
 
     res.json({
       message: "Inicio de sesión exitoso",
       admin: {
         id: admin._id,
-        username: admin.username,
-        correo: admin.correo,
+        nombre: admin.nombre,
+        email: admin.email,
         rol: admin.rol,
       },
     });

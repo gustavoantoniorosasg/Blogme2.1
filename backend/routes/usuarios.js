@@ -5,41 +5,42 @@ import Usuario from "../models/Usuario.js";
 const router = express.Router();
 
 /* -----------------------------------------
-   PING (para probar conexión)
+   PING TEST
 ------------------------------------------ */
 router.get("/ping", (req, res) => {
   res.send("pong");
 });
 
 /* -----------------------------------------
-   REGISTRO DE USUARIO  (coincide con frontend)
-   Frontend manda: { username, correo, password }
+   REGISTRO DE USUARIO
+   Frontend manda: { nombre, email, password }
 ------------------------------------------ */
 router.post("/registro", async (req, res) => {
   try {
-    const { username, correo, password } = req.body;
+    const { nombre, email, password } = req.body;
 
-    if (!username || !correo || !password) {
+    if (!nombre || !email || !password) {
       return res.status(400).json({ error: "Faltan datos" });
     }
 
-    // Verificar si el username ya existe
-    const nombreExistente = await Usuario.findOne({ username });
+    // Validar nombre existente
+    const nombreExistente = await Usuario.findOne({ nombre });
     if (nombreExistente) {
       return res.status(400).json({ error: "El nombre ya está en uso" });
     }
 
-    // Verificar si el correo ya existe
-    const emailExistente = await Usuario.findOne({ correo });
+    // Validar email existente
+    const emailExistente = await Usuario.findOne({ email });
     if (emailExistente) {
-      return res.status(400).json({ error: "El correo ya está registrado" });
+      return res.status(400).json({ error: "El email ya está registrado" });
     }
 
+    // Encriptar contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const nuevoUsuario = new Usuario({
-      username,
-      correo,
+      nombre,
+      email,
       password: hashedPassword,
     });
 
@@ -54,20 +55,17 @@ router.post("/registro", async (req, res) => {
 
 /* -----------------------------------------
    LOGIN
-   Frontend manda: { username, password }
+   Frontend manda: { nombre, password }
 ------------------------------------------ */
 router.post("/login", async (req, res) => {
   try {
-    const { username, nombre, password } = req.body;
+    const { nombre, password } = req.body;
 
-    // Soporte a ambos nombres (compatibilidad antigua)
-    const userSearch = username || nombre;
-
-    if (!userSearch || !password) {
+    if (!nombre || !password) {
       return res.status(400).json({ error: "Faltan datos" });
     }
 
-    const usuario = await Usuario.findOne({ username: userSearch });
+    const usuario = await Usuario.findOne({ nombre });
 
     if (!usuario) {
       return res.status(400).json({ error: "Nombre incorrecto" });
@@ -83,7 +81,9 @@ router.post("/login", async (req, res) => {
       mensaje: "Login exitoso",
       usuario: {
         id: usuario._id,
-        username: usuario.username,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        avatar: usuario.avatar,
       },
     });
   } catch (error) {

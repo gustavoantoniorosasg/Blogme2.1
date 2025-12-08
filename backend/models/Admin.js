@@ -5,23 +5,23 @@ const AdminSchema = new mongoose.Schema(
     nombre: {
       type: String,
       required: true,
-      trim: true,
+      trim: true
     },
-    correo: {
+    email: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
-      trim: true,
+      trim: true
     },
     password: {
       type: String,
-      required: true,
+      required: true
     },
     rol: {
       type: String,
-      default: "admin",
-    },
+      default: "admin"
+    }
   },
   { timestamps: true }
 );

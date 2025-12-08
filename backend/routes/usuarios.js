@@ -1,137 +1,104 @@
+// backend/routes/usuarios.js
 import express from "express";
 import Usuario from "../models/Usuario.js";
 import bcrypt from "bcrypt";
 
 const router = express.Router();
 
-/* ==========================================
-   📌 DESPERTAR RENDER — GET /api/usuarios/ping
-========================================== */
+// ==========================
+//       PRUEBA SERVER
+// ==========================
 router.get("/ping", (req, res) => {
-  res.json({ ok: true, ts: Date.now() });
+  res.send("pong");
 });
 
-/* ==========================================
-   📌 REGISTRO — POST /api/usuarios/registro
-========================================== */
-router.post("/registro", async (req, res) => {
+// ==========================
+//       REGISTRO
+// ==========================
+router.post("/registrar", async (req, res) => {
   try {
-    const { username, correo, password, avatar } = req.body;
+    const { nombre, correo, password } = req.body;
 
-    if (!username || !correo || !password) {
+    if (!nombre || !correo || !password) {
       return res.status(400).json({ error: "Faltan datos" });
     }
 
-    // Verificar si ya existe el correo
     const existe = await Usuario.findOne({ correo });
     if (existe) {
-      return res.status(400).json({ error: "El correo ya existe" });
+      return res.status(400).json({ error: "Correo ya registrado" });
     }
 
-    // Encriptar contraseña
-    const passwordEncriptada = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(password, 10);
 
-    // Crear nuevo usuario
-    const nuevo = new Usuario({
-      username,
+    const usuario = new Usuario({
+      nombre,
       correo,
-      password: passwordEncriptada,
-      avatar: avatar || "https://api.dicebear.com/9.x/thumbs/svg?seed=user",
+      password: hash,
+      avatar: "",
+      bio: ""
     });
 
-    await nuevo.save();
+    await usuario.save();
 
-    res.status(201).json({
-      message: "Usuario registrado con éxito",
-      usuario: nuevo,
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al registrar usuario" });
+    res.json({ mensaje: "Usuario registrado", usuario });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Error al registrar" });
   }
 });
 
-/* ==========================================
-   📌 LOGIN — POST /api/usuarios/login
-========================================== */
+// ==========================
+//       LOGIN
+// ==========================
 router.post("/login", async (req, res) => {
   try {
     const { correo, password } = req.body;
 
-    if (!correo || !password) {
-      return res.status(400).json({ error: "Faltan datos" });
-    }
-
     const usuario = await Usuario.findOne({ correo });
-    if (!usuario)
-      return res.status(404).json({ error: "No existe el usuario" });
-
-    const coincide = await bcrypt.compare(password, usuario.password);
-    if (!coincide)
-      return res.status(403).json({ error: "Contraseña incorrecta" });
-
-    res.json({
-      message: "Login correcto",
-      usuario: {
-        id: usuario._id,
-        username: usuario.username,
-        correo: usuario.correo,
-        avatar: usuario.avatar,
-      },
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error en login" });
-  }
-});
-
-/* ==========================================
-   📌 OBTENER PERFIL POR ID — GET /api/usuarios/:id
-========================================== */
-router.get("/:id", async (req, res) => {
-  try {
-    const usuario = await Usuario.findById(req.params.id).select("-password");
-
     if (!usuario) {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
 
-    res.json(usuario);
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al obtener usuario" });
-  }
-});
-
-/* ==========================================
-   📌 EDITAR PERFIL — PUT /api/usuarios/:id
-========================================== */
-router.put("/:id", async (req, res) => {
-  try {
-    const data = req.body;
-    delete data.password;
-
-    const actualizado = await Usuario.findByIdAndUpdate(
-      req.params.id,
-      data,
-      { new: true }
-    ).select("-password");
-
-    if (!actualizado) {
-      return res.status(404).json({ error: "Usuario no encontrado" });
+    const ok = await bcrypt.compare(password, usuario.password);
+    if (!ok) {
+      return res.status(401).json({ error: "Contraseña incorrecta" });
     }
 
     res.json({
-      message: "Perfil actualizado",
-      usuario: actualizado,
+      mensaje: "Login correcto",
+      usuario: {
+        id: usuario._id,
+        nombre: usuario.nombre,
+        correo: usuario.correo,
+        avatar: usuario.avatar,
+        bio: usuario.bio
+      }
     });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Error en login" });
+  }
+});
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al actualizar perfil" });
+// ==========================
+//     ACTUALIZAR PERFIL
+// ==========================
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const data = {
+      nombre: req.body.nombre,
+      bio: req.body.bio,
+      avatar: req.body.avatar
+    };
+
+    const actualizado = await Usuario.findByIdAndUpdate(id, data, { new: true });
+
+    res.json({ mensaje: "Perfil actualizado", usuario: actualizado });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Error al actualizar" });
   }
 });
 

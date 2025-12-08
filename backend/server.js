@@ -20,11 +20,13 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS FIJO Y FUNCIONANDO PARA VERCEL
+// ===============================
+//      CORS CONFIG
+// ===============================
 app.use(cors({
   origin: [
-    "https://blogme2-1.vercel.app",  
-    "https://blogme2-1-bqhl.vercel.app", 
+    "https://blogme2-1.vercel.app",
+    "https://blogme2-1-bqhl.vercel.app",
     "http://localhost:5173",
     "http://localhost:3000"
   ],
@@ -33,10 +35,8 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// habilitar preflight
 app.options("*", cors());
 
-// headers globales
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "https://blogme2-1.vercel.app");
   res.header("Access-Control-Allow-Credentials", "true");
@@ -48,13 +48,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// 🔹 Conexión MongoDB
+// ===============================
+//  CONEXIÓN MONGODB
+// ===============================
 const conectarDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-
     console.log("✅ MongoDB Atlas conectado correctamente");
-
     await crearAdminPorDefecto();
   } catch (error) {
     console.error("❌ Error conectando MongoDB:", error.message);
@@ -84,21 +84,27 @@ const crearAdminPorDefecto = async () => {
 
 conectarDB();
 
-// Rutas API
-app.get("/", (req, res) =>
-  res.send("🚀 API BlogMe funcionando correctamente")
-);
+// ===============================
+//        RUTAS API
+// ===============================
+app.get("/", (req, res) => {
+  res.send("🚀 API BlogMe funcionando correctamente");
+});
 
-app.use("/api/usuarios", require("./routes/usuarios"));
+app.use("/api/usuarios", usuarios);          // ← CORREGIDO
 app.use("/api/admin", adminRoutes);
 app.use("/api/publicaciones", publicacionesRoutes);
 
-// Ruta NO encontrada
+// ===============================
+//      RUTA 404
+// ===============================
 app.use((req, res) => {
   res.status(404).json({ msg: "Ruta no encontrada" });
 });
 
-// Servidor activo
+// ===============================
+//      SERVIDOR ACTIVO
+// ===============================
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () =>
   console.log(`🔥 Backend activo en puerto http://localhost:${PORT}`)

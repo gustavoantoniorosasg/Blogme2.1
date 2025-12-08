@@ -86,7 +86,7 @@ loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   // AHORA login por nombre, NO correo
-  const nombre = document.getElementById("login-correo").value.trim();
+  const nombre = document.getElementById("login-nombre").value.trim();
   const password = document.getElementById("login-password").value.trim();
 
   if (!nombre || !password)

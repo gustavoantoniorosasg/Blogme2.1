@@ -148,39 +148,20 @@ registerForm.addEventListener("submit", async (e) => {
   const username = document.getElementById("reg-username").value.trim();
   const correo = document.getElementById("reg-correo").value.trim();
   const password = document.getElementById("reg-password").value.trim();
-  const avatarFile = document.getElementById("reg-avatar").files[0];
+  const avatar = document.getElementById("reg-avatar").value.trim();
 
-  registerMsg.textContent = "Creando cuenta...";
-
-  let avatarURL = "https://i.imgur.com/2ZzK8K7.png"; // avatar por defecto
+  const data = {
+    username,
+    correo,
+    password,
+    avatar: avatar || null
+  };
 
   try {
-    // 🟣 SI EL USUARIO SUBIÓ UNA IMAGEN → subirla a Cloudinary
-    if (avatarFile) {
-      const data = new FormData();
-      data.append("file", avatarFile);
-      data.append("upload_preset", "blogme");  // TU PRESET
-      data.append("cloud_name", "TU_CLOUD_NAME"); // TU CLOUD NAME
-
-      const cloudRes = await fetch(
-        "https://api.cloudinary.com/v1_1/TU_CLOUD_NAME/image/upload",
-        { method: "POST", body: data }
-      );
-
-      const cloudJson = await cloudRes.json();
-      avatarURL = cloudJson.secure_url;
-    }
-
-    // 🟢 Registrar en tu backend
     const res = await fetch(`${API_URL}/usuarios/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nombre: username,
-        email: correo,
-        password,
-        avatar: avatarURL
-      }),
+      body: JSON.stringify(data),
     });
 
     const json = await res.json();
@@ -190,10 +171,9 @@ registerForm.addEventListener("submit", async (e) => {
       return;
     }
 
-    registerMsg.textContent = "Cuenta creada correctamente 🔥";
+    registerMsg.textContent = "Cuenta creada 🔥";
 
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
     registerMsg.textContent = "Error en el servidor";
   }
 });

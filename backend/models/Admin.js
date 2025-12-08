@@ -1,23 +1,29 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
-import Admin from "./models/Admin.js";
-import dotenv from "dotenv";
-dotenv.config();
 
-const crearAdmin = async () => {
-  await mongoose.connect(process.env.MONGO_URI);
+const AdminSchema = new mongoose.Schema(
+  {
+    nombre: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    correo: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    rol: {
+      type: String,
+      default: "admin",
+    },
+  },
+  { timestamps: true }
+);
 
-  const passwordHash = await bcrypt.hash("123456", 10);
-
-  await Admin.create({
-    username: "admin",
-    correo: "admin@blogme.com",
-    password: passwordHash,
-    rol: "admin",
-  });
-
-  console.log("Admin creado correctamente");
-  process.exit();
-};
-
-crearAdmin();
+export default mongoose.model("Admin", AdminSchema);

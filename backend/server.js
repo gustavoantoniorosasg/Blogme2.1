@@ -17,22 +17,27 @@ import publicacionesRoutes from "./routes/publicaciones.js";
 
 const app = express();
 
+// ===============================
+//      MIDDLEWARE
+// ===============================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ===============================
 //      CORS CONFIG
 // ===============================
+const allowedOrigins = [
+  "https://blogme2-1.vercel.app",
+  "https://blogme2-1-bqhl.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000",
+];
+
 app.use(cors({
-  origin: [
-    "https://blogme2-1.vercel.app",
-    "https://blogme2-1-bqhl.vercel.app",
-    "http://localhost:5173",
-    "http://localhost:3000"
-  ],
+  origin: allowedOrigins,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 app.options("*", cors());
@@ -62,6 +67,7 @@ const conectarDB = async () => {
   }
 };
 
+// Crear admin por defecto si no existe
 const crearAdminPorDefecto = async () => {
   try {
     const existeAdmin = await Admin.findOne({ nombre: "admin" });
@@ -91,7 +97,7 @@ app.get("/", (req, res) => {
   res.send("🚀 API BlogMe funcionando correctamente");
 });
 
-app.use("/api/usuarios", usuarios);          // ← CORREGIDO
+app.use("/api/usuarios", usuarios);
 app.use("/api/admin", adminRoutes);
 app.use("/api/publicaciones", publicacionesRoutes);
 

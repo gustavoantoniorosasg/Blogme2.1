@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===========================================================
   function showToast(msg, type = "info") {
     let toast = document.getElementById("toast");
-
     if (!toast) {
       toast = document.createElement("div");
       toast.id = "toast";
@@ -78,73 +77,65 @@ document.addEventListener("DOMContentLoaded", () => {
     return pass.length >= 6;
   }
 
-// ===========================================================
-// 🔐 LOGIN (CORREGIDO PARA EMAIL + PASSWORD)
-// ===========================================================
-loginForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+  // ===========================================================
+  // 🔐 LOGIN (email + password)
+  // ===========================================================
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const emailInput = document.getElementById("login-nombre");  // mismo input pero ahora será email
-  const passInput = document.getElementById("login-password");
+    const emailInput = document.getElementById("login-nombre"); 
+    const passInput = document.getElementById("login-password");
 
-  if (!emailInput || !passInput) {
-    return showToast("Error en el formulario, recarga la página", "error");
-  }
+    if (!emailInput || !passInput) return showToast("Error en el formulario", "error");
 
-  const email = emailInput.value.trim();
-  const password = passInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passInput.value.trim();
 
-  if (!email || !password) return showToast("Completa todos los campos", "warn");
+    if (!email || !password) return showToast("Completa todos los campos", "warn");
+    if (!validarPassword(password)) return showToast("Contraseña inválida", "warn");
 
-  if (!validarPassword(password)) return showToast("Contraseña inválida", "warn");
+    try {
+      // 1️⃣ Login admin
+      const adminResp = await fetch(`${window.API_ADMIN}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
 
-  try {
-    // 1️⃣ Intentar login admin — AHORA CON EMAIL
-    const adminResp = await fetch(`${window.API_ADMIN}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
+      if (adminResp.ok) {
+        const data = await adminResp.json();
+        localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
+        localStorage.setItem("adminSession", "true");
+        showToast("Bienvenido administrador 👑", "success");
 
-    if (adminResp.ok) {
-      const data = await adminResp.json();
-      localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
-      localStorage.setItem("adminSession", "true");
+        return setTimeout(() => {
+          window.location.href = "/admin-panel.html";
+        }, 800);
+      }
 
-      showToast("Bienvenido administrador 👑", "success");
+      // 2️⃣ Login usuario normal
+      const userResp = await fetch(`${window.API_USUARIOS}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
 
-      return setTimeout(() => {
-        window.location.href = "/admin-panel.html";
+      const data = await userResp.json();
+      if (!userResp.ok) return showToast(data.error || "Credenciales incorrectas", "error");
+
+      localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
+      localStorage.removeItem("adminSession");
+      showToast(`Bienvenido ${data.usuario.nombre} 👋`, "success");
+
+      setTimeout(() => {
+        window.location.href = "/publicaciones.html";
       }, 800);
+
+    } catch (error) {
+      console.error("⚠️ Error en login:", error);
+      showToast("No se pudo conectar con el servidor", "error");
     }
-
-    // 2️⃣ Login usuario normal — AHORA CON EMAIL
-    const userResp = await fetch(`${window.API_USUARIOS}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await userResp.json();
-
-    if (!userResp.ok) {
-      return showToast(data.error || "Credenciales incorrectas", "error");
-    }
-
-    localStorage.setItem("usuarioActivo", JSON.stringify(data.usuario));
-    localStorage.removeItem("adminSession");
-
-    showToast(`Bienvenido ${data.usuario.nombre} 👋`, "success");
-
-    setTimeout(() => {
-      window.location.href = "/publicaciones.html";
-    }, 800);
-
-  } catch (error) {
-    console.error("⚠️ Error en login:", error);
-    showToast("No se pudo conectar con el servidor", "error");
-  }
-});
+  });
 
   // ===========================================================
   // 📝 REGISTRO
@@ -170,11 +161,9 @@ loginForm.addEventListener("submit", async (e) => {
       });
 
       const data = await resp.json();
-
       if (!resp.ok) return showToast(data.error || "Error al registrarse", "error");
 
       showToast("Cuenta creada con éxito 🎉", "success");
-
       setTimeout(() => loginTab.click(), 600);
 
     } catch (error) {

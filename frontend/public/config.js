@@ -5,7 +5,7 @@
 window.API = "https://blogme2-1.onrender.com/api";
 window.API_USUARIOS = `${window.API}/usuarios`;
 
-// ---- DESPIERTA RENDER ----
+// ---- DESPIERTA BACKEND ----
 fetch(`${window.API_USUARIOS}/ping`).catch(() => {});
 
 // Detecta si frontend está en Vercel

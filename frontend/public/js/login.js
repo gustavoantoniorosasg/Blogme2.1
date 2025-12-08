@@ -160,7 +160,7 @@ registerForm.addEventListener("submit", async (e) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ nombre, email, password })
+      body: JSON.stringify({ nombre, correo: email, password })
     });
 
     let data = {};

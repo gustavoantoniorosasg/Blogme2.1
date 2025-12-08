@@ -15,7 +15,7 @@ router.get("/ping", (req, res) => {
 // ==========================
 //       REGISTRO
 // ==========================
-router.post("/registrar", async (req, res) => {
+router.post("/registro", async (req, res) => {
   try {
     const { nombre, correo, password } = req.body;
 
@@ -52,9 +52,9 @@ router.post("/registrar", async (req, res) => {
 // ==========================
 router.post("/login", async (req, res) => {
   try {
-    const { correo, password } = req.body;
+    const { nombre, password } = req.body;
 
-    const usuario = await Usuario.findOne({ correo });
+    const usuario = await Usuario.findOne({ nombre });
     if (!usuario) {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }

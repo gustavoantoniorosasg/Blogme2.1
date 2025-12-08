@@ -1,7 +1,7 @@
-console.log("🌍 API apuntando a:", window.API_USUARIOS);
+console.log("🌍 API USUARIOS:", window.API_USUARIOS);
 
 // ===========================================================
-// 🔔 TOAST SYSTEM
+// 🔔 SISTEMA DE TOAST
 // ===========================================================
 function showToast(msg, type = "info") {
   let toast = document.getElementById("toast");
@@ -20,7 +20,7 @@ function showToast(msg, type = "info") {
   }, 2500);
 }
 
-// Toast visuals
+// Estilos del toast
 const toastStyle = document.createElement("style");
 toastStyle.innerHTML = `
 #toast {
@@ -80,7 +80,7 @@ function validarPassword(pass) {
 
 
 // ===========================================================
-// 🔐 LOGIN — POR NOMBRE
+// 🔐 LOGIN — SOLO NOMBRE
 // ===========================================================
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -95,7 +95,7 @@ loginForm.addEventListener("submit", async (e) => {
     return showToast("Contraseña inválida", "warn");
 
   try {
-    // 1️⃣ Intento login de administrador
+    // 1️⃣ Intento login de admin
     const adminResp = await fetch(`${window.API_ADMIN}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -108,14 +108,14 @@ loginForm.addEventListener("submit", async (e) => {
       localStorage.setItem("usuarioActivo", JSON.stringify(data.admin));
       localStorage.setItem("adminSession", "true");
 
-      showToast(`Bienvenido administrador 👑`, "success");
+      showToast("Bienvenido administrador 👑", "success");
 
       return setTimeout(() => {
         window.location.href = "/admin-panel.html";
-      }, 800);
+      }, 700);
     }
 
-    // 2️⃣ Si no es admin, login normal
+    // 2️⃣ Login usuario normal
     const respUser = await fetch(`${window.API_USUARIOS}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -138,19 +138,19 @@ loginForm.addEventListener("submit", async (e) => {
     }, 700);
 
   } catch (error) {
-    console.error(error);
+    console.error("⚠️ Error en login:", error);
     showToast("No se pudo conectar con el servidor", "error");
   }
 });
 
 
 // ===========================================================
-// 📝 REGISTRO USUARIOS
+// 📝 REGISTRO DE USUARIOS
 // ===========================================================
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const nombre = document.getElementById("reg-nombre").value.trim();
+  const nombre = document.getElementById("reg-username").value.trim();
   const correo = document.getElementById("reg-correo").value.trim();
   const password = document.getElementById("reg-password").value.trim();
 
@@ -175,9 +175,7 @@ registerForm.addEventListener("submit", async (e) => {
 
     showToast("Cuenta creada con éxito 🎉", "success");
 
-    setTimeout(() => {
-      loginTab.click();
-    }, 600);
+    setTimeout(() => loginTab.click(), 600);
 
   } catch (error) {
     console.error(error);

@@ -2,13 +2,13 @@
 import mongoose from "mongoose";
 
 const UsuarioSchema = new mongoose.Schema({
-  username: {
+  nombre: {
     type: String,
     required: true,
     unique: true
   },
 
-  correo: {
+  email: {
     type: String,
     required: true,
     unique: true
@@ -35,5 +35,5 @@ const UsuarioSchema = new mongoose.Schema({
   }
 });
 
-// 👇 fuerza a usar colección "usuarios"
+// Fuerza la colección "usuarios"
 export default mongoose.model("Usuario", UsuarioSchema, "usuarios");

@@ -1,103 +1,89 @@
 import express from "express";
-import Usuario from "../models/Usuario.js";
 import bcrypt from "bcrypt";
+import Usuario from "../models/Usuario.js";
 
 const router = express.Router();
 
-// ==========================
-//       PRUEBA SERVER
-// ==========================
+/* -----------------------------------------
+   PING (para probar conexión)
+------------------------------------------ */
 router.get("/ping", (req, res) => {
   res.send("pong");
 });
 
-// ==========================
-//       REGISTRO
-// ==========================
-router.post("/registro", async (req, res) => {
+/* -----------------------------------------
+   REGISTRO DE USUARIO
+------------------------------------------ */
+router.post("/registrar", async (req, res) => {
   try {
-    const { nombre, correo, password } = req.body;
+    const { nombre, email, password } = req.body;
 
-    if (!nombre || !correo || !password) {
+    if (!nombre || !email || !password) {
       return res.status(400).json({ error: "Faltan datos" });
     }
 
-    const existe = await Usuario.findOne({ correo });
-    if (existe) {
-      return res.status(400).json({ error: "Correo ya registrado" });
+    // Verificar si el nombre ya existe
+    const nombreExistente = await Usuario.findOne({ nombre });
+    if (nombreExistente) {
+      return res.status(400).json({ error: "El nombre ya está en uso" });
     }
 
-    const hash = await bcrypt.hash(password, 10);
+    // Verificar si el email ya existe
+    const emailExistente = await Usuario.findOne({ email });
+    if (emailExistente) {
+      return res.status(400).json({ error: "El email ya está registrado" });
+    }
 
-    const usuario = new Usuario({
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const nuevoUsuario = new Usuario({
       nombre,
-      correo,
-      password: hash,
-      avatar: "",
-      bio: ""
+      email,
+      password: hashedPassword,
     });
 
-    await usuario.save();
+    await nuevoUsuario.save();
 
-    res.json({ mensaje: "Usuario registrado", usuario });
-  } catch (e) {
-    console.error("❌ Error en /registro:", e);
-    res.status(500).json({ error: "Error al registrar" });
+    res.json({ mensaje: "Usuario registrado correctamente" });
+  } catch (error) {
+    console.error("Error registrando usuario:", error);
+    res.status(500).json({ error: "Error en el servidor" });
   }
 });
 
-// ==========================
-//          LOGIN
-// ==========================
+/* -----------------------------------------
+   LOGIN POR NOMBRE
+------------------------------------------ */
 router.post("/login", async (req, res) => {
   try {
     const { nombre, password } = req.body;
 
-    const usuario = await Usuario.findOne({ nombre });
-    if (!usuario) {
-      return res.status(404).json({ error: "Usuario no encontrado" });
+    if (!nombre || !password) {
+      return res.status(400).json({ error: "Faltan datos" });
     }
 
-    const ok = await bcrypt.compare(password, usuario.password);
-    if (!ok) {
-      return res.status(401).json({ error: "Contraseña incorrecta" });
+    const usuario = await Usuario.findOne({ nombre });
+
+    if (!usuario) {
+      return res.status(400).json({ error: "Nombre incorrecto" });
+    }
+
+    const passwordValida = await bcrypt.compare(password, usuario.password);
+
+    if (!passwordValida) {
+      return res.status(400).json({ error: "Contraseña incorrecta" });
     }
 
     res.json({
-      mensaje: "Login correcto",
+      mensaje: "Login exitoso",
       usuario: {
         id: usuario._id,
         nombre: usuario.nombre,
-        correo: usuario.correo,
-        avatar: usuario.avatar,
-        bio: usuario.bio
-      }
+      },
     });
-  } catch (e) {
-    console.error("❌ Error en /login:", e);
-    res.status(500).json({ error: "Error en login" });
-  }
-});
-
-// ==========================
-//     ACTUALIZAR PERFIL
-// ==========================
-router.put("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const data = {
-      nombre: req.body.nombre,
-      bio: req.body.bio,
-      avatar: req.body.avatar
-    };
-
-    const actualizado = await Usuario.findByIdAndUpdate(id, data, { new: true });
-
-    res.json({ mensaje: "Perfil actualizado", usuario: actualizado });
-  } catch (e) {
-    console.error("❌ Error en PUT /:id:", e);
-    res.status(500).json({ error: "Error al actualizar" });
+  } catch (error) {
+    console.error("Error en login:", error);
+    res.status(500).json({ error: "Error en el servidor" });
   }
 });
 

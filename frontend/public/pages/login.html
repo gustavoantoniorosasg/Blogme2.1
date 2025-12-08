@@ -9,13 +9,12 @@
     window.API_USUARIOS = "https://blogme2-1.onrender.com/api/usuarios";
   </script>
 
-  <script src="../config.js"></script>
-
   <title>BlogMe - Iniciar sesión</title>
   <link rel="stylesheet" href="../styles/login.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
+
   <div class="animated-bg"></div>
 
   <div class="login-container">
@@ -26,11 +25,13 @@
       <button class="tab" id="register-tab">Crear cuenta</button>
     </div>
 
-    <!-- 🟢 FORMULARIO LOGIN -->
+    <!-- 🟢 FORMULARIO LOGIN POR NOMBRE -->
     <form id="login-form" class="form active">
-      <!-- AHORA ES NOMBRE DE USUARIO -->
-     <input id="login-nombre" type="text" placeholder="Nombre de usuario" required autocomplete="username">
+
+      <input id="login-nombre" type="text" placeholder="Nombre de usuario" required autocomplete="username">
+
       <input id="login-password" type="password" placeholder="Contraseña" required autocomplete="current-password">
+
       <button type="submit" class="btn">Entrar</button>
 
       <p id="login-msg" class="msg"></p>
@@ -38,15 +39,21 @@
 
     <!-- 🟣 FORMULARIO REGISTRO -->
     <form id="register-form" class="form">
-      <input id="login-nombre" type="text" placeholder="Nombre de usuario" required autocomplete="username">
+
+      <input id="reg-username" type="text" placeholder="Nombre de usuario" required autocomplete="username">
+
       <input id="reg-correo" type="email" placeholder="Correo electrónico" required autocomplete="email">
+
       <input id="reg-password" type="password" placeholder="Contraseña" required autocomplete="new-password">
+
       <button type="submit" class="btn">Registrarse</button>
 
       <p id="register-msg" class="msg"></p>
     </form>
   </div>
 
+  <!-- Script principal -->
   <script src="../js/login.js"></script>
+
 </body>
 </html>

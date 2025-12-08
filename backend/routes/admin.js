@@ -7,7 +7,7 @@ import Publicacion from "../models/Publicaciones.js";
 const router = express.Router();
 
 /* ============================================================
-   🔐 LOGIN DE ADMINISTRADOR (Corregido)
+   🔐 LOGIN DE ADMINISTRADOR
 ============================================================ */
 router.post("/login", async (req, res) => {
   try {
@@ -18,7 +18,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Faltan datos" });
     }
 
-    // Buscar admin usando email (como define tu modelo)
+    // Buscar admin usando email
     const admin = await Admin.findOne({ email });
 
     if (!admin) {
@@ -31,7 +31,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Contraseña incorrecta" });
     }
 
-    // Respuesta correcta
+    // Respuesta
     res.json({
       message: "Inicio de sesión exitoso",
       admin: {
@@ -65,7 +65,10 @@ router.get("/usuarios", async (req, res) => {
 ============================================================ */
 router.get("/publicaciones", async (req, res) => {
   try {
-    const publicaciones = await Publicacion.find().sort({ ts: -1 }).lean();
+    const publicaciones = await Publicacion.find()
+      .sort({ createdAt: -1 })
+      .lean();
+
     res.json(publicaciones);
   } catch (err) {
     console.error("Error al obtener publicaciones:", err);
@@ -79,6 +82,7 @@ router.get("/publicaciones", async (req, res) => {
 router.delete("/usuarios/:id", async (req, res) => {
   try {
     const eliminado = await Usuario.findByIdAndDelete(req.params.id);
+
     if (!eliminado) {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
@@ -96,6 +100,7 @@ router.delete("/usuarios/:id", async (req, res) => {
 router.delete("/publicaciones/:id", async (req, res) => {
   try {
     const eliminado = await Publicacion.findByIdAndDelete(req.params.id);
+
     if (!eliminado) {
       return res.status(404).json({ error: "Publicación no encontrada" });
     }
